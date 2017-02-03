@@ -1,5 +1,29 @@
 # Change Log
 
+## [v1.0.0.88](https://github.com/Necrobot-Private/NecroBot/tree/v1.0.0.88) (2017-02-02)
+[Full Changelog](https://github.com/Necrobot-Private/NecroBot/compare/v1.0.0.86...v1.0.0.88)
+
+## Bugs & Enhancements
+- Updated for 0.55 API
+
+## [v1.0.0.86](https://github.com/Necrobot-Private/NecroBot/tree/v1.0.0.86) (2017-02-01)
+[Full Changelog](https://github.com/Necrobot-Private/NecroBot/compare/v1.0.0.82...v1.0.0.86)
+
+## Bugs & Enhancements
+- Fix inventory crashes
+- Fix stardust updates
+
+## [v1.0.0.82](https://github.com/Necrobot-Private/NecroBot/tree/v1.0.0.82) (2017-01-31)
+[Full Changelog](https://github.com/Necrobot-Private/NecroBot/compare/v1.0.0.81...v1.0.0.82)
+
+- Bug fix: #662 - Starting from last position should work again.
+
+## [v1.0.0.81](https://github.com/Necrobot-Private/NecroBot/tree/v1.0.0.81) (2017-01-31)
+[Full Changelog](https://github.com/Necrobot-Private/NecroBot/compare/v1.0.0.76...v1.0.0.81)
+
+## Bugs & Enhancements
+- Bug fix: Fix inventory updates to properly update console and GUI
+
 ## [v1.0.0.76](https://github.com/Necrobot-Private/NecroBot/tree/v1.0.0.76) (2017-01-27)
 [Full Changelog](https://github.com/Necrobot-Private/NecroBot/compare/v1.0.0.72...v1.0.0.76)
 

@@ -22,11 +22,10 @@ namespace PoGo.NecroBot.Logic.Tasks
 
         public static List<ulong> PokemonIdcp = new List<ulong>();
 
+        // jjskuld - Ignore CS1998 warning for now.
+        #pragma warning disable 1998
         public static async Task Execute(ISession session)
         {
-            var myPokemonFamilies = await session.Inventory.GetPokemonFamilies();
-            var myPokeSettings = await session.Inventory.GetPokemonSettings();
-
             var highestsPokemonCp =
                 session.Inventory.GetHighestsCp(session.LogicSettings.AmountOfPokemonToDisplayOnStart);
 
@@ -35,12 +34,12 @@ namespace PoGo.NecroBot.Logic.Tasks
                         pokemon =>
                             Tuple.Create(
                                 pokemon,
-                                PokemonInfo.CalculateMaxCp(pokemon),
+                                PokemonInfo.CalculateMaxCp(pokemon.PokemonId),
                                 PokemonInfo.CalculatePokemonPerfection(pokemon),
                                 PokemonInfo.GetLevel(pokemon),
                                 PokemonInfo.GetPokemonMove1(pokemon),
                                 PokemonInfo.GetPokemonMove2(pokemon),
-                                PokemonInfo.GetCandy(pokemon, myPokemonFamilies, myPokeSettings)
+                                PokemonInfo.GetCandy(session, pokemon)
                             )
                     )
                     .ToList();
@@ -53,12 +52,12 @@ namespace PoGo.NecroBot.Logic.Tasks
                         pokemon =>
                             Tuple.Create(
                                 pokemon,
-                                PokemonInfo.CalculateMaxCp(pokemon),
+                                PokemonInfo.CalculateMaxCp(pokemon.PokemonId),
                                 PokemonInfo.CalculatePokemonPerfection(pokemon),
                                 PokemonInfo.GetLevel(pokemon),
                                 PokemonInfo.GetPokemonMove1(pokemon),
                                 PokemonInfo.GetPokemonMove2(pokemon),
-                                PokemonInfo.GetCandy(pokemon, myPokemonFamilies, myPokeSettings)
+                                PokemonInfo.GetCandy(session, pokemon)
                             )
                     )
                     .ToList();
@@ -133,7 +132,7 @@ namespace PoGo.NecroBot.Logic.Tasks
                             pokemon.StaminaMax.ToString(),
                             pokemon.Move1.ToString(),
                             pokemon.Move2.ToString(),
-                            PokemonInfo.GetCandy(pokemon, myPokemonFamilies, myPokeSettings).ToString(),
+                            PokemonInfo.GetCandy(session, pokemon).ToString(),
                             pokemon.OwnerName,
                             pokemon.Origin.ToString(),
                             pokemon.HeightM.ToString(),
@@ -164,5 +163,6 @@ namespace PoGo.NecroBot.Logic.Tasks
                 }
             }
         }
+        #pragma warning restore 1998
     }
 }

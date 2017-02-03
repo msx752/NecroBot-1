@@ -127,7 +127,7 @@ namespace PoGo.Necrobot.Window
             this.datacontext.PlayerInfo.PKMPerHour = (int)(stat.TotalPokemons / stat.GetRuntime());
             this.datacontext.PlayerInfo.TimeToLevelUp = $"{this.playerStats.GetCurrent().StatsExport.HoursUntilLvl:00}h :{this.playerStats.GetCurrent().StatsExport.MinutesUntilLevel:00}m";
             this.datacontext.PlayerInfo.Level = this.playerStats.GetCurrent().StatsExport.Level;
-            this.datacontext.PlayerInfo.Startdust = this.playerStats.GetCurrent().TotalStardust;
+            this.datacontext.PlayerInfo.Stardust = this.playerStats.GetCurrent().TotalStardust;
             this.datacontext.PlayerInfo.Exp = this.playerStats.GetCurrent().StatsExport.CurrentXp;
             this.datacontext.PlayerInfo.LevelExp = this.playerStats.GetCurrent().StatsExport.LevelupXp;
         }
@@ -216,6 +216,18 @@ namespace PoGo.Necrobot.Window
 
         private void tabMain_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            if (e.AddedItems != null && e.AddedItems.Count > 0)
+            {
+                var addedItem = e.AddedItems[0];
+                if (addedItem != null)
+                {
+                    if (addedItem.GetType() == typeof(TabItem) && ((TabItem)addedItem).Content?.GetType() == typeof(Controls.ItemsInventory))
+                    {
+                        DataContext dataContext = (DataContext)((TabItem)addedItem).DataContext;
+                        dataContext?.ItemsList?.SyncSelectedValues();
+                    }
+                }
+            }
         }
     }
 }

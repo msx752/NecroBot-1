@@ -105,6 +105,11 @@ namespace PoGo.NecroBot.CLI
 
             var socketURL = session.LogicSettings.DataSharingDataUrl;
 
+            if (!string.IsNullOrEmpty(session.LogicSettings.SnipeDataAccessKey))
+            {
+                socketURL += "&access_key=" + session.LogicSettings.SnipeDataAccessKey;
+            }
+
             using (var ws = new WebSocket(socketURL))
             {
                 ws.Log.Level = LogLevel.Fatal;
@@ -236,7 +241,11 @@ namespace PoGo.NecroBot.CLI
             if (match != null && !string.IsNullOrEmpty(match.Groups[1].Value))
             {
                 //var data = JsonConvert.DeserializeObject<List<Logic.Tasks.HumanWalkSnipeTask.FastPokemapItem>>(match.Groups[1].Value);
+
+                // jjskuld - Ignore CS4014 warning for now.
+                #pragma warning disable 4014
                 HumanWalkSnipeTask.AddFastPokemapItem(match.Groups[1].Value);
+                #pragma warning restore 4014
             }
         }
 

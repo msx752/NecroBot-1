@@ -511,6 +511,18 @@ namespace PoGo.NecroBot.Logic.Model.Settings
                                 settings["PokeStopConfig"]["PokeStopLimitMinutes"] = 1200;
                         }
                         break;
+                    case 8:
+                        string oldTemplate = (string)settings["PokemonConfig"]["RenameTemplate"];
+                        settings["PokemonConfig"]["RenameTemplate"] = oldTemplate.Replace("{0}", "{Name}").Replace("{1}", "{IV}") + "_LV{Level}";
+                        break;
+
+                    case 9:
+                        if (settings["PlayerConfig"]["RandomizeSettingsByPercent"] == null)
+                        {
+                            settings["PlayerConfig"]["RandomizeSettingsByPercent"] = 5;
+                        }
+                        break;
+
                         // Add more here.
                 }
             }

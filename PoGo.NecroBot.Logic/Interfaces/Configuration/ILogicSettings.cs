@@ -92,6 +92,7 @@ namespace PoGo.NecroBot.Logic.Interfaces.Configuration
         string UseBerriesOperator { get; }
         string UpgradePokemonMinimumStatsOperator { get; }
         int MaxTravelDistanceInMeters { get; }
+        bool StartFromLastPosition { get; }
         bool UseGpxPathing { get; }
         string GpxFile { get; }
         bool UseLuckyEggsWhileEvolving { get; }
@@ -231,6 +232,7 @@ namespace PoGo.NecroBot.Logic.Interfaces.Configuration
         string DataSharingIdentifiation { get; }
         bool DataSharingEnable { get; }
         string DataSharingDataUrl { get; }
+        string SnipeDataAccessKey { get; }
         bool AllowAutoSnipe { get; }
         MultipleBotConfig MultipleBotConfig { get; }
         List<AuthConfig> Bots { get; }

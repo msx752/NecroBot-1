@@ -29,7 +29,7 @@ namespace PoGo.NecroBot.Logic.Model.Settings
 
         public int GenRandom(int val)
         {
-            double min = 0.9 * val;
+            double min = val - (_settings.PlayerConfig.RandomizeSettingsByPercent / 100.0 * val);
             int newVal = (int)Math.Floor(GenRandom(min, val));
             if (newVal < 0)
                 newVal = 0;
@@ -38,7 +38,7 @@ namespace PoGo.NecroBot.Logic.Model.Settings
 
         public double GenRandom(double val)
         {
-            double min = 0.9 * val;
+            double min = val - (_settings.PlayerConfig.RandomizeSettingsByPercent / 100.0 * val);
             double newVal = GenRandom(min, val);
             if (newVal < 0)
                 newVal = 0;
@@ -47,7 +47,7 @@ namespace PoGo.NecroBot.Logic.Model.Settings
 
         public float GenRandom(float val)
         {
-            double min = 0.9 * val;
+            double min = val - (_settings.PlayerConfig.RandomizeSettingsByPercent / 100.0 * val);
             double newVal = GenRandom(min, val);
             if (newVal < 0)
                 newVal = 0;
@@ -145,6 +145,7 @@ namespace PoGo.NecroBot.Logic.Model.Settings
         public int KeepMinDuplicatePokemon => _settings.PokemonConfig.KeepMinDuplicatePokemon;
         public bool PrioritizeIvOverCp => _settings.PokemonConfig.PrioritizeIvOverCp;
         public int MaxTravelDistanceInMeters => GenRandom(_settings.LocationConfig.MaxTravelDistanceInMeters);
+        public bool StartFromLastPosition => _settings.LocationConfig.StartFromLastPosition;
         public string GpxFile => _settings.GPXConfig.GpxFile;
         public bool UseGpxPathing => _settings.GPXConfig.UseGpxPathing;
         public bool UseLuckyEggsWhileEvolving => _settings.PokemonConfig.UseLuckyEggsWhileEvolving;
@@ -266,6 +267,7 @@ namespace PoGo.NecroBot.Logic.Model.Settings
         public string DataSharingIdentifiation => _settings.DataSharingConfig.DataServiceIdentification;
         public bool AllowAutoSnipe => _settings.DataSharingConfig.AutoSnipe;
 
+        public string SnipeDataAccessKey => _settings.DataSharingConfig.SnipeDataAccessKey;
         public int SnipePauseOnOutOfBallTime => GenRandom(_settings.SnipeConfig.SnipePauseOnOutOfBallTime);
         public string DataSharingDataUrl => _settings.DataSharingConfig.DataRecieverURL;
         public bool UseTransferFilterToCatch => _settings.CustomCatchConfig.UseTransferFilterToCatch;

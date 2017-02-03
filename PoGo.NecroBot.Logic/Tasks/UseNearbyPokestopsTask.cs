@@ -188,7 +188,8 @@ namespace PoGo.NecroBot.Logic.Tasks
                 .Where(p => p.CooldownCompleteTimestampMs < DateTime.UtcNow.ToUnixTime())
                 .Where(f => f.Type == FortType.Checkpoint ||
                             UseGymBattleTask.CanAttackGym(session, f, deployedPokemons) ||
-                            UseGymBattleTask.CanTrainGym(session, f, null, deployedPokemons))
+                            UseGymBattleTask.CanTrainGym(session, f, null, deployedPokemons) ||
+                            UseGymBattleTask.CanDeployToGym(session, f, null, deployedPokemons))
                 .ToList();
 
             if ((session.LogicSettings.GymConfig.EnableAttackGym && forts.Where(w => w.Type == FortType.Gym && UseGymBattleTask.CanAttackGym(session, w, deployedPokemons)).Count() == 0) ||
@@ -329,7 +330,7 @@ namespace PoGo.NecroBot.Logic.Tasks
                     if (session.LogicSettings.AutomaticallyLevelUpPokemon)
                         await LevelUpPokemonTask.Execute(session, cancellationToken);
 
-                    await GetPokeDexCount.Execute(session, cancellationToken);
+                    GetPokeDexCount.Execute(session, cancellationToken);
                 }
             }
         }
