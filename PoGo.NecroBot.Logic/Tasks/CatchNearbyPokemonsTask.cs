@@ -14,6 +14,8 @@ using POGOProtos.Enums;
 using POGOProtos.Inventory.Item;
 using POGOProtos.Map.Pokemon;
 using POGOProtos.Networking.Responses;
+using TinyIoC;
+using GeoCoordinatePortable;
 
 #endregion
 
@@ -24,13 +26,33 @@ namespace PoGo.NecroBot.Logic.Tasks
         public static async Task Execute(ISession session, CancellationToken cancellationToken,
             PokemonId priority = PokemonId.Missingno, bool sessionAllowTransfer = true)
         {
+            TinyIoC.TinyIoCContainer.Current.Resolve<MultiAccountManager>().ThrowIfSwitchAccountRequested();
             cancellationToken.ThrowIfCancellationRequested();
+            
+            //make sure not catch pokemon nearby at snipe locaiton.
+
+            //this code is not necsecssarily but still ok to leave here.
+
+            if(session.KnownLongitudeBeforeSnipe != 0 && session.KnownLatitudeBeforeSnipe != 0 && 
+                LocationUtils.CalculateDistanceInMeters(session.KnownLatitudeBeforeSnipe, 
+                session.KnownLongitudeBeforeSnipe, 
+                session.Client.CurrentLatitude, 
+                session.Client.CurrentLongitude) > 1000)
+            {
+                Logger.Write($"ERROR - Bot stucked at snipe location({session.Client.CurrentLatitude},{session.Client.CurrentLongitude}). Teleport him back home - if you see this message please PM samuraitruong");
+
+                session.Client.Player.SetCoordinates(session.KnownLatitudeBeforeSnipe, session.KnownLongitudeBeforeSnipe, session.Client.CurrentAltitude);
+                return;
+            }
+
             if (!session.LogicSettings.CatchPokemon) return;
 
             if (session.Stats.CatchThresholdExceeds(session))
             {
                 if (session.LogicSettings.AllowMultipleBot &&
-                    session.LogicSettings.MultipleBotConfig.SwitchOnCatchLimit)
+                    session.LogicSettings.MultipleBotConfig.SwitchOnCatchLimit &&
+                    TinyIoCContainer.Current.Resolve<MultiAccountManager>().AllowSwitch()
+                    )
                 {
                     throw new ActiveSwitchByRuleException()
                     {
@@ -42,10 +64,10 @@ namespace PoGo.NecroBot.Logic.Tasks
                 return;
             }
 
-
             Logger.Write(session.Translation.GetTranslation(TranslationString.LookingForPokemon), LogLevel.Debug);
 
             var nearbyPokemons = await GetNearbyPokemons(session);
+            if (nearbyPokemons == null) return;
             var priorityPokemon = nearbyPokemons.Where(p => p.PokemonId == priority).FirstOrDefault();
             var pokemons = nearbyPokemons.Where(p => p.PokemonId != priority).ToList();
             EncounterResponse encounter = null;
@@ -53,6 +75,8 @@ namespace PoGo.NecroBot.Logic.Tasks
             if (priorityPokemon != null)
             {
                 pokemons.Insert(0, priorityPokemon);
+                LocationUtils.UpdatePlayerLocationWithAltitude(session,
+                        new GeoCoordinate(priorityPokemon.Latitude, priorityPokemon.Longitude, session.Client.CurrentAltitude), 0); // Set speed to 0 for random speed.
                 encounter = await session.Client.Encounter
                     .EncounterPokemon(priorityPokemon.EncounterId, priorityPokemon.SpawnPointId);
 
@@ -66,8 +90,15 @@ namespace PoGo.NecroBot.Logic.Tasks
             foreach (var pokemon in pokemons)
             {
                 await MSniperServiceTask.Execute(session, cancellationToken);
-
+                
+                //should load it dynamic from - MapSettings.encounterRangeMeters_
+                if (LocationUtils.CalculateDistanceInMeters(pokemon.Latitude, pokemon.Longitude, session.Client.CurrentLatitude, session.Client.CurrentLongitude) > session.Client.GlobalSettings.MapSettings.EncounterRangeMeters)
+                {
+                    Logger.Debug($"THIS POKEMON IS TOO FAR, {pokemon.Latitude}, {pokemon.Longitude}");
+                    continue;
+                }
                 cancellationToken.ThrowIfCancellationRequested();
+                TinyIoC.TinyIoCContainer.Current.Resolve<MultiAccountManager>().ThrowIfSwitchAccountRequested();
                 string pokemonUniqueKey = $"{pokemon.EncounterId}";
 
                 if (session.Cache.GetCacheItem(pokemonUniqueKey) != null)
@@ -114,6 +145,8 @@ namespace PoGo.NecroBot.Logic.Tasks
 
                 if (encounter == null || encounter.Status != EncounterResponse.Types.Status.EncounterSuccess)
                 {
+                    LocationUtils.UpdatePlayerLocationWithAltitude(session,
+                        new GeoCoordinate(pokemon.Latitude, pokemon.Longitude, session.Client.CurrentAltitude), 0); // Set speed to 0 for random speed.
                     encounter =
                         await session.Client.Encounter.EncounterPokemon(pokemon.EncounterId, pokemon.SpawnPointId);
                 }
@@ -164,12 +197,15 @@ namespace PoGo.NecroBot.Logic.Tasks
         public static async Task<IOrderedEnumerable<MapPokemon>> GetNearbyPokemons(ISession session)
         {
             var mapObjects = await session.Client.Map.GetMapObjects();
+            if (mapObjects == null || mapObjects.MapCells == null) return null;
+
             var forts = mapObjects.MapCells.SelectMany(p => p.Forts).ToList();
             var nearbyPokemons = mapObjects.MapCells.SelectMany(x => x.NearbyPokemons).ToList();
             
             session.EventDispatcher.Send(new PokeStopListEvent(forts, nearbyPokemons));
 
             var pokemons = mapObjects.MapCells.SelectMany(i => i.CatchablePokemons)
+                .Where(pokemon=>LocationUtils.CalculateDistanceInMeters(pokemon.Latitude, pokemon.Longitude, session.Client.CurrentLatitude, session.Client.CurrentLongitude) <= session.Client.GlobalSettings.MapSettings.EncounterRangeMeters)
                 .OrderBy(
                     i =>
                         LocationUtils.CalculateDistanceInMeters(session.Client.CurrentLatitude,

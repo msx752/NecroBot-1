@@ -22,9 +22,9 @@ namespace PoGo.NecroBot.Logic.Tasks
 
         public static async Task Execute(ISession session, CancellationToken cancellationToken)
         {
+            
             cancellationToken.ThrowIfCancellationRequested();
-
-            //await session.Inventory.RefreshCachedInventory();
+            TinyIoC.TinyIoCContainer.Current.Resolve<MultiAccountManager>().ThrowIfSwitchAccountRequested();
 
             var currentTotalItems = session.Inventory.GetTotalItemCount();
             if ((session.Profile.PlayerData.MaxItemStorage * session.LogicSettings.RecycleInventoryAtUsagePercentage / 100.0f) > currentTotalItems)
@@ -96,7 +96,7 @@ namespace PoGo.NecroBot.Logic.Tasks
                 if (item.Count <= 0) continue;
 
                 cancellationToken.ThrowIfCancellationRequested();
-
+                TinyIoC.TinyIoCContainer.Current.Resolve<MultiAccountManager>().ThrowIfSwitchAccountRequested();
                 await session.Client.Inventory.RecycleItem(item.ItemId, item.Count);
                 await session.Inventory.UpdateInventoryItem(item.ItemId);
 
@@ -124,6 +124,7 @@ namespace PoGo.NecroBot.Logic.Tasks
             {
                 _diff -= itemsToRecycle;
                 cancellationToken.ThrowIfCancellationRequested();
+                TinyIoC.TinyIoCContainer.Current.Resolve<MultiAccountManager>().ThrowIfSwitchAccountRequested();
                 await session.Client.Inventory.RecycleItem(item, itemsToRecycle);
                 await session.Inventory.UpdateInventoryItem(item);
                 if (session.LogicSettings.VerboseRecycling)

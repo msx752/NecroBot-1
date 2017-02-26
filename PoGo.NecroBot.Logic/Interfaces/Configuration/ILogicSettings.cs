@@ -84,12 +84,7 @@ namespace PoGo.NecroBot.Logic.Interfaces.Configuration
         int AmountOfTimesToUpgradeLoop { get; }
         int GetMinStarDustForLevelUp { get; }
         bool UseLuckyEggConstantly { get; }
-        int MaxBerriesToUsePerPokemon { get; }
         bool UseIncenseConstantly { get; }
-        float UseBerriesMinCp { get; }
-        float UseBerriesMinIv { get; }
-        double UseBerriesBelowCatchProbability { get; }
-        string UseBerriesOperator { get; }
         string UpgradePokemonMinimumStatsOperator { get; }
         int MaxTravelDistanceInMeters { get; }
         bool StartFromLastPosition { get; }
@@ -101,9 +96,12 @@ namespace PoGo.NecroBot.Logic.Interfaces.Configuration
         float EvolveAboveIvValue { get; }
         bool DumpPokemonStats { get; }
         bool RenamePokemon { get; }
+        bool RenamePokemonRespectTransferRule { get; }
         bool RenameOnlyAboveIv { get; }
         float FavoriteMinIvPercentage { get; }
         float FavoriteMinCp { get; }
+        int FavoriteMinLevel { get; }
+        string FavoriteOperator { get; }
         bool AutoFavoritePokemon { get; }
         string RenameTemplate { get; }
         int AmountOfPokemonToDisplayOnStart { get; }
@@ -169,6 +167,7 @@ namespace PoGo.NecroBot.Logic.Interfaces.Configuration
 
         Dictionary<PokemonId, TransferFilter> PokemonsTransferFilter { get; }
         Dictionary<PokemonId, SnipeFilter> PokemonSnipeFilters { get; }
+        Dictionary<PokemonId, EvolveFilter> PokemonEvolveFilters { get; }
         Dictionary<PokemonId, UpgradeFilter> PokemonUpgradeFilters { get; }
 
         Dictionary<PokemonId, BotSwitchPokemonFilter> BotSwitchPokemonFilters { get; }
@@ -229,11 +228,7 @@ namespace PoGo.NecroBot.Logic.Interfaces.Configuration
         int RenamePokemonActionDelay { get; }
 
         GymConfig GymConfig { get; }
-        string DataSharingIdentifiation { get; }
-        bool DataSharingEnable { get; }
-        string DataSharingDataUrl { get; }
-        string SnipeDataAccessKey { get; }
-        bool AllowAutoSnipe { get; }
+        DataSharingConfig DataSharingConfig { get; }
         MultipleBotConfig MultipleBotConfig { get; }
         List<AuthConfig> Bots { get; }
         bool AllowMultipleBot { get; }
@@ -244,5 +239,25 @@ namespace PoGo.NecroBot.Logic.Interfaces.Configuration
         bool AutosnipeVerifiedOnly { get; }
         int SnipePauseOnOutOfBallTime { get; }
         int DefaultAutoSnipeCandy { get; }
+        int AutoSnipeBatchSize { get; }
+        GUIConfig UIConfig { get; }
+        string DefaultBuddyPokemon { get; }
+        bool AutoFinishTutorial { get;  }
+        Dictionary<ItemId, ItemUseFilter> ItemUseFilters { get; }
+        double UpgradePokemonLvlMinimum { get; }
+        bool EvolveFavoritedOnly { get; }
+        string EvolveOperator { get; }
+        double EvolveMinIV { get; }
+        double EvolveMinCP { get;  }
+        double EvolveMinLevel { get; }
+        int MinLevelForAutoSnipe { get;  }
+
+        bool UseHumanlikeDelays { get; }
+        int CatchSuccessDelay { get; }
+        int CatchErrorDelay { get; }
+        int CatchEscapeDelay { get; }
+        int CatchFleeDelay { get; }
+        int CatchMissedDelay { get; }
+        int BeforeCatchDelay { get; }
     }
 }

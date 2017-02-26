@@ -24,9 +24,23 @@ namespace PoGo.NecroBot.Logic.Tasks
         public static async Task Execute(ISession session, FortData currentFortData,
             CancellationToken cancellationToken)
         {
+            TinyIoC.TinyIoCContainer.Current.Resolve<MultiAccountManager>().ThrowIfSwitchAccountRequested();
             cancellationToken.ThrowIfCancellationRequested();
             if (!session.LogicSettings.CatchPokemon ||
                 session.CatchBlockTime > DateTime.Now) return;
+
+            if (session.KnownLongitudeBeforeSnipe != 0 && session.KnownLatitudeBeforeSnipe != 0 &&
+                LocationUtils.CalculateDistanceInMeters(session.KnownLatitudeBeforeSnipe,
+                session.KnownLongitudeBeforeSnipe,
+                session.Client.CurrentLatitude,
+                session.Client.CurrentLongitude) > 1000)
+            {
+                Logger.Write($"ERROR - Bot stucked at snipe location({session.Client.CurrentLatitude},{session.Client.CurrentLongitude}). Teleport him back home - if you see this message please PM samuraitruong");
+
+                session.Client.Player.SetCoordinates(session.KnownLatitudeBeforeSnipe, session.KnownLongitudeBeforeSnipe, session.Client.CurrentAltitude);
+                return;
+            }
+
 
             Logger.Write(session.Translation.GetTranslation(TranslationString.LookingForLurePokemon), LogLevel.Debug);
 

@@ -14,6 +14,7 @@ using PoGo.NecroBot.Logic.Utils;
 using PokemonGo.RocketAPI.Exceptions;
 using static System.Threading.Tasks.Task;
 using static PoGo.NecroBot.Logic.Utils.PushNotificationClient;
+using TinyIoC;
 
 #endregion
 
@@ -121,7 +122,7 @@ namespace PoGo.NecroBot.Logic.State
                 catch (APIBadRequestException ex)
                 {
                     Logger.Write("Bad Request - If you see this message please copy error log & screenshot send back to dev asap.", level: LogLevel.Error);
-
+                    
                     session.EventDispatcher.Send(new ErrorEvent() {Message = ex.Message});
                     Logger.Write(ex.StackTrace, level: LogLevel.Error);
 
@@ -142,28 +143,43 @@ namespace PoGo.NecroBot.Logic.State
                         Environment.Exit(0);
                     }
                 }
+                catch(ActiveSwitchAccountManualException ex)
+                {
+                    session.EventDispatcher.Send(new WarnEvent { Message = "Switch account requested by user" });
+                    session.ReInitSessionWithNextBot(ex.RequestedAccount, session.Client.CurrentLatitude, session.Client.CurrentLongitude, session.Client.CurrentAltitude);
+                    state = new LoginState();
+
+                }
                 catch (ActiveSwitchByPokemonException rsae)
                 {
-                    session.EventDispatcher.Send(new WarnEvent { Message = "Encountered a good pokemon , switch another bot to catch him too." });
-                    session.ReInitSessionWithNextBot(rsae.Bot, session.Client.CurrentLatitude, session.Client.CurrentLongitude, session.Client.CurrentAltitude);
-                    state = new LoginState(rsae.LastEncounterPokemonId);
+                    if (rsae.Snipe && rsae.EncounterData != null)
+                    {
+                        session.EventDispatcher.Send(new WarnEvent { Message = $"Detected a pefect pokemon with snipe {rsae.EncounterData.PokemonId.ToString()}   IV:{rsae.EncounterData.IV}  Move:{rsae.EncounterData.Move1}/ Move:{rsae.EncounterData.Move2}   LV: Move:{rsae.EncounterData.Level}" });
+                        session.ReInitSessionWithNextBot(null,session.Client.CurrentLatitude, session.Client.CurrentLongitude, session.Client.CurrentAltitude);
+                        state = new LoginState(rsae.LastEncounterPokemonId, rsae.EncounterData);
+                    }
+                    else {
+                        session.EventDispatcher.Send(new WarnEvent { Message = "Encountered a good pokemon , switch another bot to catch him too." });
+                        session.ReInitSessionWithNextBot(rsae.Bot, session.Client.CurrentLatitude, session.Client.CurrentLongitude, session.Client.CurrentAltitude);
+                        state = new LoginState(rsae.LastEncounterPokemonId);
+                    }
                 }
                 catch (ActiveSwitchByRuleException se)
                 {
                     session.EventDispatcher.Send(new WarnEvent { Message = $"Switch bot account activated by : {se.MatchedRule.ToString()}  - {se.ReachedValue} " });
                     if (se.MatchedRule == SwitchRules.EmptyMap)
                     {
-                        session.BlockCurrentBot(90);
+                        TinyIoCContainer.Current.Resolve<MultiAccountManager>().BlockCurrentBot(90);
                         session.ReInitSessionWithNextBot();
                     }
                     else if (se.MatchedRule == SwitchRules.PokestopSoftban)
                     {
-                        session.BlockCurrentBot();
+                        TinyIoCContainer.Current.Resolve<MultiAccountManager>().BlockCurrentBot();
                         session.ReInitSessionWithNextBot();
                     }
                     else if (se.MatchedRule == SwitchRules.CatchFlee)
                     {
-                        session.BlockCurrentBot(60);
+                        TinyIoCContainer.Current.Resolve<MultiAccountManager>().BlockCurrentBot(60);
                         session.ReInitSessionWithNextBot();
                     }
                     else
@@ -179,7 +195,7 @@ namespace PoGo.NecroBot.Logic.State
                             #pragma warning restore 4014
                             session.EventDispatcher.Send(new WarnEvent() { Message = $"You reach limited. bot will sleep for {session.LogicSettings.MultipleBotConfig.OnLimitPauseTimes} min" });
 
-                            session.BlockCurrentBot(session.LogicSettings.MultipleBotConfig.OnLimitPauseTimes);
+                            TinyIoCContainer.Current.Resolve<MultiAccountManager>().BlockCurrentBot(session.LogicSettings.MultipleBotConfig.OnLimitPauseTimes);
 
                             session.ReInitSessionWithNextBot();
                         }
@@ -209,7 +225,7 @@ namespace PoGo.NecroBot.Logic.State
                         if (apiCallFailured > 20)
                         {
                             apiCallFailured = 0;
-                            session.BlockCurrentBot(30);
+                            TinyIoCContainer.Current.Resolve<MultiAccountManager>().BlockCurrentBot(30);
                             session.ReInitSessionWithNextBot();
                         }
                     }
@@ -220,7 +236,7 @@ namespace PoGo.NecroBot.Logic.State
                     session.EventDispatcher.Send(new ErrorEvent {Message = "Current Operation was canceled."});
                     if (session.LogicSettings.AllowMultipleBot)
                     {
-                        session.BlockCurrentBot(30);
+                        TinyIoCContainer.Current.Resolve<MultiAccountManager>().BlockCurrentBot(30);
                         session.ReInitSessionWithNextBot();
                     }
                     state = new LoginState();
@@ -236,7 +252,7 @@ namespace PoGo.NecroBot.Logic.State
 
                     if (session.LogicSettings.AllowMultipleBot)
                     {
-                        session.BlockCurrentBot(24 * 60); //need remove acc
+                        TinyIoCContainer.Current.Resolve<MultiAccountManager>().BlockCurrentBot(24 * 60); //need remove acc
                         session.ReInitSessionWithNextBot();
                         state = new LoginState();
                     }
@@ -295,11 +311,12 @@ namespace PoGo.NecroBot.Logic.State
                     {
                         await SendNotification(session, $"Captcha required {session.Settings.PtcUsername}{session.Settings.GoogleUsername}", session.Translation.GetTranslation(TranslationString.CaptchaShown), true);
                         session.EventDispatcher.Send(new WarnEvent { Message = session.Translation.GetTranslation(TranslationString.CaptchaShown) });
+                        Logger.Debug("Captcha not resolved");
                         if (session.LogicSettings.AllowMultipleBot)
                         {
-                            session.BlockCurrentBot(15);
+                            Logger.Debug("Change account");
+                            TinyIoCContainer.Current.Resolve<MultiAccountManager>().BlockCurrentBot(15);
                             session.ReInitSessionWithNextBot();
-
                             state = new LoginState();
                         }
                         else

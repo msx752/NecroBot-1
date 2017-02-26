@@ -22,6 +22,11 @@ using PoGo.Necrobot.Window.Model;
 using PoGo.NecroBot.Logic;
 using PoGo.NecroBot.Logic.Logging;
 using System.Diagnostics;
+using TinyIoC;
+using PoGo.NecroBot.Logic.Common;
+using System.ServiceModel.Syndication;
+using System.Net;
+using System.Xml;
 
 namespace PoGo.Necrobot.Window
 {
@@ -30,7 +35,6 @@ namespace PoGo.Necrobot.Window
     /// </summary>
     public partial class MainClientWindow : MetroWindow
     {
-
         public MainClientWindow()
         {
             InitializeComponent();
@@ -41,10 +45,9 @@ namespace PoGo.Necrobot.Window
             };
 
             this.DataContext = datacontext;
-
+            txtCmdInput.Text = TinyIoCContainer.Current.Resolve<UITranslation>().InputCommand; 
         }
-
-
+           
         private void Grid_Loaded(object sender, RoutedEventArgs e)
         {
 
@@ -52,14 +55,13 @@ namespace PoGo.Necrobot.Window
 
         private void MetroWindow_Loaded(object sender, RoutedEventArgs e)
         {
-
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+            LoadHelpArticleAsync();
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         }
         private DateTime lastClearLog = DateTime.Now;
         public void LogToConsoleTab(string message, LogLevel level, string color)
-        {
-
-            if (color == "Black" && level == LogLevel.LevelUp) color = "DarkCyan";
-
+        { 
             Dictionary<LogLevel, string> colors = new Dictionary<LogLevel, string>()
             {
                 { LogLevel.Error, "Red" },
@@ -116,22 +118,15 @@ namespace PoGo.Necrobot.Window
             this.ctrlEggsControl.Session = session;
             this.datacontext.PokemonList.Session = session;
             botMap.SetDefaultPosition(session.Settings.DefaultLatitude, session.Settings.DefaultLongitude);
+            var accountManager = TinyIoCContainer.Current.Resolve<MultiAccountManager>();
+            gridAccounts.ItemsSource = accountManager.Accounts;
         }
 
         private void OnPlayerStatisticChanged()
         {
             var stat = this.playerStats.GetCurrent();
-
-            this.datacontext.PlayerInfo.Runtime = this.playerStats.GetCurrent().FormatRuntime();
-            this.datacontext.PlayerInfo.EXPPerHour = (int)(stat.TotalExperience / stat.GetRuntime());
-            this.datacontext.PlayerInfo.PKMPerHour = (int)(stat.TotalPokemons / stat.GetRuntime());
-            this.datacontext.PlayerInfo.TimeToLevelUp = $"{this.playerStats.GetCurrent().StatsExport.HoursUntilLvl:00}h :{this.playerStats.GetCurrent().StatsExport.MinutesUntilLevel:00}m";
-            this.datacontext.PlayerInfo.Level = this.playerStats.GetCurrent().StatsExport.Level;
-            this.datacontext.PlayerInfo.Stardust = this.playerStats.GetCurrent().TotalStardust;
-            this.datacontext.PlayerInfo.Exp = this.playerStats.GetCurrent().StatsExport.CurrentXp;
-            this.datacontext.PlayerInfo.LevelExp = this.playerStats.GetCurrent().StatsExport.LevelupXp;
+            this.datacontext.PlayerInfo.DirtyEventHandle(stat);
         }
-
         private void PokemonInventory_OnPokemonItemSelected(PokemonDataViewModel selected)
         {
             var numberSelected = datacontext.PokemonList.Pokemons.Count(x => x.IsSelected);
@@ -140,15 +135,16 @@ namespace PoGo.Necrobot.Window
         bool isConsoleShowing = false;
         private void menuConsole_Click(object sender, RoutedEventArgs e)
         {
+            var translator = TinyIoCContainer.Current.Resolve<UITranslation>();
+
             if (isConsoleShowing)
             {
-                consoleMenuText.Text = "Show Console";
+                consoleMenuText.Text = translator.ShowConsole; 
                 ConsoleHelper.HideConsoleWindow();
             }
             else
             {
-
-                consoleMenuText.Text = "Close Console";
+                consoleMenuText.Text = translator.HideConsole;
                 ConsoleHelper.ShowConsoleWindow();
 
             }
@@ -158,21 +154,23 @@ namespace PoGo.Necrobot.Window
 
         private void menuSetting_Click(object sender, RoutedEventArgs e)
         {
-            var configWindow = new AppConfigWindow(this, System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "config\\config.json"));
-            configWindow.ShowDialog();
+            var configWindow = new SettingsWindow(this, System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "config\\config.json"));
+            configWindow.ShowDialog();         
         }
 
         private void btnHideInfo_Click(object sender, RoutedEventArgs e)
         {
+            var translator = TinyIoCContainer.Current.Resolve<UITranslation>();
+
             if (grbPlayerInfo.Height == 35)
             {
-                btnHideInfo.Content = "HIDE";
+                btnHideInfo.Content = translator.Hide;
                 grbPlayerInfo.Height = 135;
             }
             else
             {
                 grbPlayerInfo.Height = 35;
-                btnHideInfo.Content = "SHOW";
+                btnHideInfo.Content = translator.Show;
             }
         }
 
@@ -180,8 +178,6 @@ namespace PoGo.Necrobot.Window
         {
             ResourceDictionary dict = new ResourceDictionary();
             dict.Source = new Uri($"pack://application:,,,/MahApps.Metro;component/Styles/Accents/{color}.xaml", UriKind.Absolute);
-
-
             var theme = Application.Current.Resources.MergedDictionaries.LastOrDefault();
             Application.Current.Resources.MergedDictionaries.Add(dict);
             Application.Current.Resources.MergedDictionaries.Remove(theme);
@@ -228,6 +224,55 @@ namespace PoGo.Necrobot.Window
                     }
                 }
             }
+        }
+
+        private void menuAuth_Click(object sender, RoutedEventArgs e)
+        {
+            popAccounts.IsOpen = true;
+        }
+
+        private void btnDonate_Click(object sender, RoutedEventArgs e)
+        {
+            Process.Start("http://snipe.necrobot2.com?donate");
+        }
+
+        private void btnSwitchAcount_Click(object sender, RoutedEventArgs e)
+        {
+            var btn = ((Button)sender);
+            var account = (MultiAccountManager.BotAccount)btn.CommandParameter ;
+
+            var manager = TinyIoCContainer.Current.Resolve<MultiAccountManager>();
+
+            manager.SwitchAccountTo(account);
+        }
+
+        DateTime lastTimeLoadHelp = DateTime.MinValue;
+        private async Task LoadHelpArticleAsync()
+        {
+            if (lastTimeLoadHelp < DateTime.Now.AddMinutes(-30))
+            {
+                var feed = SyndicationFeed.Load(XmlReader.Create("http://necrobot2.com/feed.xml"));
+                lastTimeLoadHelp = DateTime.Now;
+                this.Dispatcher.Invoke(() =>
+                {
+                    lsvHelps.ItemsSource = feed.Items.OrderByDescending(x=>x.PublishDate);
+                });
+            }
+        }
+        private void Help_Click(object sender, RoutedEventArgs e)
+        {
+            popHelpArticles.IsOpen = true;
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+            LoadHelpArticleAsync();
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+        }
+
+        private void Hyperlink_Click(object sender, RoutedEventArgs e)
+        {
+            var hlink = sender as Hyperlink;
+            
+            Process.Start(hlink.NavigateUri.ToString());
+            popHelpArticles.IsOpen = false;
         }
     }
 }

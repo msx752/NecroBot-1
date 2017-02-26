@@ -179,8 +179,13 @@ namespace PoGo.NecroBot.CLI
                 {
                     var lat = double.Parse(crds[0]);
                     var lng = double.Parse(crds[1]);
-                    settings.LocationConfig.DefaultLatitude = lat;
-                    settings.LocationConfig.DefaultLongitude = lng;
+                    //If lastcoord is snipe coord, bot start from default location
+
+                    if (LocationUtils.CalculateDistanceInMeters(lat, lng, settings.LocationConfig.DefaultLatitude, settings.LocationConfig.DefaultLongitude) < 2000)
+                    {
+                        settings.LocationConfig.DefaultLatitude = lat;
+                        settings.LocationConfig.DefaultLongitude = lng;
+                    }
                 }
                 catch (Exception)
                 {
@@ -304,9 +309,11 @@ namespace PoGo.NecroBot.CLI
                 StarterConfigForm configForm = new StarterConfigForm(_session, settings, elevationService, configFile);
                 if (configForm.ShowDialog() == DialogResult.OK)
                 {
-                    var fileName = Assembly.GetExecutingAssembly().Location;
+                    var fileName = Assembly.GetEntryAssembly().Location;
+
                     Process.Start(fileName);
                     Environment.Exit(0);
+
                 }
 
                 //if (GlobalSettings.PromptForSetup(_session.Translation))
@@ -376,14 +383,14 @@ namespace PoGo.NecroBot.CLI
             ProgressBar.Fill(90);
 
             _session.Navigation.WalkStrategy.UpdatePositionEvent +=
-                (session, lat, lng) => _session.EventDispatcher.Send(new UpdatePositionEvent { Latitude = lat, Longitude = lng });
+                (session, lat, lng, speed) => _session.EventDispatcher.Send(new UpdatePositionEvent { Latitude = lat, Longitude = lng, Speed = speed });
             _session.Navigation.WalkStrategy.UpdatePositionEvent += LoadSaveState.SaveLocationToDisk;
 
             ProgressBar.Fill(100);
 
             var accountManager = new MultiAccountManager(logicSettings.Bots);
 
-            accountManager.Add(settings.Auth.AuthConfig);
+            var mainAccount = accountManager.Add(settings.Auth.AuthConfig);
 
             ioc.Register<MultiAccountManager>(accountManager);
 
@@ -418,7 +425,7 @@ namespace PoGo.NecroBot.CLI
                 #pragma warning restore 4014
             }
 
-            if (_session.LogicSettings.DataSharingEnable)
+            if (_session.LogicSettings.DataSharingConfig.EnableSyncData)
             {
                 BotDataSocketClient.StartAsync(_session);
                 _session.EventDispatcher.EventReceived += evt => BotDataSocketClient.Listen(evt, _session);
@@ -429,8 +436,9 @@ namespace PoGo.NecroBot.CLI
             {
                 ServicePointManager.ServerCertificateValidationCallback +=
                     (sender, certificate, chain, sslPolicyErrors) => true;
-                MSniperServiceTask.ConnectToService();
-                _session.EventDispatcher.EventReceived += evt => MSniperServiceTask.AddToList(evt);
+                //temporary disable MSniper connection because site under attacking.
+                //MSniperServiceTask.ConnectToService();
+                //_session.EventDispatcher.EventReceived += evt => MSniperServiceTask.AddToList(evt);
             }
             var trackFile = Path.GetTempPath() + "\\necrobot2.io";
 

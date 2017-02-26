@@ -1,22 +1,58 @@
-﻿using PoGo.NecroBot.Logic.PoGoUtils;
+﻿using PoGo.NecroBot.Logic.Model;
+using PoGo.NecroBot.Logic.PoGoUtils;
 using PoGo.NecroBot.Logic.State;
+using PoGo.NecroBot.Logic.Tasks;
 using POGOProtos.Data;
 using POGOProtos.Enums;
-using POGOProtos.Inventory;
+using POGOProtos.Inventory.Item;
 using POGOProtos.Settings.Master;
+using PokemonGo.RocketAPI.Util;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace PoGo.Necrobot.Window.Model
 {
+    public class EvolutionToPokemon : ViewModelBase
+    {
+        public int CandyNeed { get; set; }
+        public ulong OriginPokemonId { get; set; }
+        public PokemonId Pokemon { get; set; }
+        public bool AllowEvolve { get; set; }
+        public ItemId ItemNeed { get; set; }
+    }
     public class PokemonDataViewModel : ViewModelBase
     {
         public PokemonDataViewModel(ISession session, PokemonData pokemon)
         {
             this.Session = session;
             this.PokemonData = pokemon;
+            this.Displayed = true;
+            var pkmSettings = session.Inventory.GetPokemonSettings().Result;
+            var setting = pkmSettings.FirstOrDefault(x => x.PokemonId == pokemon.PokemonId);
+
+            this.EvolutionBranchs = new List<EvolutionToPokemon>();
+            bool first = true;
+
+            
+            //TODO - implement the candy count for enable evolution
+            foreach (var item in setting.EvolutionBranch)
+            {
+                this.EvolutionBranchs.Add(new EvolutionToPokemon()
+                {
+                    CandyNeed = item.CandyCost,
+                    ItemNeed = item.EvolutionItemRequirement,
+                    Pokemon = item.Evolution,
+                    AllowEvolve = first,
+                    OriginPokemonId = pokemon.Id
+                });
+                first = false;
+
+            }
         }
 
+        public List<EvolutionToPokemon> EvolutionBranchs { get; set; }
         internal void UpdateWith(PokemonData item)
         {
             this.PokemonData = item;
@@ -29,7 +65,7 @@ namespace PoGo.Necrobot.Window.Model
                 return PokemonData.Id;
             }
         }
-        
+
         public string PokemonName
         {
             get
@@ -39,7 +75,18 @@ namespace PoGo.Necrobot.Window.Model
 
             set
             {
-                PokemonData.Nickname = value;
+                if (PokemonData.Nickname != value)
+                {
+                    // Fire off the rename
+                    Task.Run(async () =>
+                    {
+                        await RenameSinglePokemonTask.Execute(
+                            this.Session,
+                            PokemonData.Id,
+                            value,
+                            this.Session.CancellationTokenSource.Token);
+                    });
+                }
             }
         }
 
@@ -115,6 +162,37 @@ namespace PoGo.Necrobot.Window.Model
             }
         }
 
+        public DateTime CaughtTime => TimeUtil.GetDateTimeFromMilliseconds((long)pokemonData.CreationTimeMs).ToLocalTime();
+
+        private GeoLocation geoLocation;
+        public GeoLocation GeoLocation
+        {
+            get
+            {
+                return geoLocation;
+            }
+
+            set
+            {
+                geoLocation = value;
+                RaisePropertyChanged("CaughtLocation");
+            }
+        }
+
+        public string CaughtLocation
+        {
+            get
+            {
+                if (geoLocation == null)
+                {
+                    // Just return latitude, longitude string
+                    return new GeoLocation(pokemonData.CapturedCellId).ToString();
+                }
+
+                return geoLocation.ToString();
+            }
+        }
+
         private bool isTransfering;
         public bool IsTransfering
         {
@@ -170,7 +248,7 @@ namespace PoGo.Necrobot.Window.Model
                 RaisePropertyChanged("IsSelected");
             }
         }
-        
+
         public double Level
         {
             get
@@ -178,7 +256,7 @@ namespace PoGo.Necrobot.Window.Model
                 return PokemonInfo.GetLevel(PokemonData);
             }
         }
-        
+
         public int CP
         {
             get
@@ -195,8 +273,7 @@ namespace PoGo.Necrobot.Window.Model
             }
         }
 
-        public DateTime CaughtTime { get; set; }
-        
+
         public int HP
         {
             get
@@ -204,7 +281,7 @@ namespace PoGo.Necrobot.Window.Model
                 return PokemonData.Stamina;
             }
         }
-        
+
         public int MaxHP
         {
             get
@@ -222,7 +299,7 @@ namespace PoGo.Necrobot.Window.Model
         }
 
         public string HPDisplay => $"{HP}/{MaxHP}";
-        
+
         public string PokemonIcon
         {
             get
@@ -239,7 +316,8 @@ namespace PoGo.Necrobot.Window.Model
         }
 
         private PokemonData pokemonData;
-        public PokemonData PokemonData {
+        public PokemonData PokemonData
+        {
             get
             {
                 return pokemonData;
@@ -315,5 +393,7 @@ namespace PoGo.Necrobot.Window.Model
                     return "Upgrade";
             }
         }
+
+        public bool Displayed { get; set; }
     }
 }

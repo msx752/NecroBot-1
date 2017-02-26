@@ -9,13 +9,16 @@
                       Title="Necrobot 2 - Window GUI"
                       Height="768"
                       Width="1024"
+                      MinWidth="800"
                       BorderThickness="0"
                       GlowBrush="Black"
                       ResizeMode="CanResizeWithGrip"
                       WindowTransitionsEnabled="False"
-                      WindowStartupLocation="CenterScreen" Loaded="MetroWindow_Loaded">
+                      WindowStartupLocation="CenterScreen" 
+                      Loaded="MetroWindow_Loaded">
     <Control.Resources>
         <c:I18NConveter x:Key="I18NConveter"/>
+        <c:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
         <Style x:Key="LatoFont">
             <Setter Property="TextElement.FontFamily" 
             Value="pack://application:,,,/Resources/#Lato-light" />
@@ -24,6 +27,48 @@
     
     <Controls:MetroWindow.RightWindowCommands>
         <Controls:WindowCommands>
+            <Button Click="Help_Click">
+                <StackPanel Orientation="Horizontal">
+                    <Rectangle Width="20"
+                               Height="20"
+                               Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}">
+                        <Rectangle.OpacityMask>
+                            <VisualBrush Stretch="Fill" Visual="{DynamicResource appbar_book_perspective_help}" />
+                        </Rectangle.OpacityMask>
+                    </Rectangle>
+                    <TextBlock Margin="4 0 0 0"
+                               VerticalAlignment="Center"
+                               Text="{Binding Source=Help, Converter={StaticResource ResourceKey=I18NConveter}}" />
+
+                    <Popup Margin="10,10,0,13" Name="popHelpArticles"
+                           HorizontalAlignment="Left"
+                           VerticalAlignment="Top"
+                           
+                           StaysOpen="False"
+                           Width="420" Height="580" IsOpen="False" AllowsTransparency="True">
+                        <Grid Background="WhiteSmoke">
+                            <ListView Name="lsvHelps" Margin="20">
+                                <ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            
+                                            <TextBlock FontFamily="/NecroBot2.Win;component/Resources/Fonts/Lato/#Lato Medium">
+                                                <Hyperlink NavigateUri="{Binding Id}" Click="Hyperlink_Click" CommandParameter="{Binding}">
+                                                    <TextBlock Text="{Binding Path=Title.Text}"></TextBlock>
+                                                </Hyperlink>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+                        </Grid>
+
+                    </Popup>
+
+                </StackPanel>
+
+            </Button>
+            
             <Button Click="Theme_Selected">
                 <StackPanel Orientation="Horizontal">
                     <Rectangle Width="20"
@@ -86,7 +131,7 @@
                     </Rectangle>
                     <TextBlock Margin="4 0 0 0" Name="consoleMenuText"
                                VerticalAlignment="Center"
-                               Text="{Binding Source=ShowConsole, Converter={StaticResource I18NConveter}}" />
+                               Text="{Binding Source=ShowConsole, Converter={StaticResource ResourceKey=I18NConveter}}" />
                 </StackPanel>
 
             </Button>
@@ -104,6 +149,67 @@
                                Text="{Binding Source=MenuSetting, Converter={StaticResource I18NConveter}}" />
                 </StackPanel>
             </Button>
+
+            <Button Click="menuAuth_Click" Name="menuAuth">
+                <StackPanel Orientation="Horizontal">
+                    <Rectangle Width="20"
+                               Height="20"
+                               Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}">
+                        <Rectangle.OpacityMask>
+                            <VisualBrush Stretch="Fill" Visual="{DynamicResource appbar_user}" />
+                        </Rectangle.OpacityMask>
+                    </Rectangle>
+                    <TextBlock Margin="4 0 0 0"
+                               VerticalAlignment="Center"
+                               Text="{Binding Source=AccountSetting, Converter={StaticResource I18NConveter}}" />
+                    
+                    <Popup Margin="10,10,0,13" Name="popAccounts"
+                           HorizontalAlignment="Left"
+                           VerticalAlignment="Top"
+                           Width="700" Height="350" IsOpen="False" AllowsTransparency="True" StaysOpen="False"
+                           Placement="Left"
+                           >
+                        <Border CornerRadius="4,4,4,4" BorderBrush="DodgerBlue" BorderThickness="1,3,1,5" Background="White">
+                            <DataGrid  Margin="20,20,20,20" Name="gridAccounts" AutoGenerateColumns="False" CanUserDeleteRows="False" CanUserAddRows="False">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Binding="{Binding AuthType}" Header="AuthType"></DataGridTextColumn>
+                                    <DataGridTextColumn Binding="{Binding PtcUsername}" Header="PTC Username"></DataGridTextColumn>
+                                    <DataGridTextColumn Binding="{Binding PtcPassword}" Header="PTC Password"></DataGridTextColumn>
+                                    <DataGridTextColumn Binding="{Binding GoogleUsername}" Header="GG Username"></DataGridTextColumn>
+                                    <DataGridTextColumn Binding="{Binding GooglePassword}" Header="GG Password"></DataGridTextColumn>
+                                    <DataGridTextColumn Binding="{Binding Level}" Header="Level"></DataGridTextColumn>
+                                    <DataGridTemplateColumn Header="">
+                                        <DataGridTemplateColumn.CellEditingTemplate>
+                                            <DataTemplate>
+                                                
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellEditingTemplate>
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            
+                                            <DataTemplate>
+                                                <StackPanel>
+                                                    <Button   Name="btnSwitchAcount" Click="btnSwitchAcount_Click" CommandParameter="{Binding}" Foreground="Green" Background="Transparent"  IsEnabled="{Binding IsRunning, Converter= {StaticResource InverseBooleanConverter}}" Cursor="Hand">
+                                                        <TextBlock Margin="5,5,5,5" Text="{Binding Source=Switch, Converter={StaticResource I18NConveter }}">
+                                                        </TextBlock>
+                                                    </Button>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            
+                            </DataGrid>
+                        </Border>
+                    </Popup>
+                </StackPanel>
+            </Button>
+            <Button Name="btnDonate"  Click="btnDonate_Click" Margin="0,0,0,0">
+                <StackPanel Orientation="Horizontal">
+                    <Image Source="http://www.northernyouth.ca/wp-content/uploads/2014/11/NYL-Donate-Button.png" Height="30"/>
+                </StackPanel>
+                
+            </Button>
+            
         </Controls:WindowCommands>
     </Controls:MetroWindow.RightWindowCommands>
 
@@ -165,32 +271,35 @@
             </TabControl.Resources>
             <TabItem Name="tabMap" >
                 <TabItem.Header>
-                    <TextBlock Margin="10,7,10,7" Text="{Binding  Source=MapTabTitle, Converter={StaticResource ResourceKey=I18NConveter}, FallbackValue=MAPS}"/>
+                    <TextBlock Margin="7,5,7,5" Text="{Binding  Source=MapTabTitle, Converter={StaticResource ResourceKey=I18NConveter}, FallbackValue=MAPS}" FontSize="15"/>
                 </TabItem.Header>
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="7*" />
-                        <!--<ColumnDefinition Width="5" />-->
+                        <ColumnDefinition Width="5" />
                         <ColumnDefinition Width="auto" />
                     </Grid.ColumnDefinitions>
                     <local:MapControl x:Name="botMap" Grid.Column="0" DataContext="{Binding Path=Map}" />
-                    <!--
+                    
                     <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" />
-                    <local:SidebarControl Visibility="Hidden" DataContext="{Binding Path=Sidebar}"
+                    <local:SidebarControl Visibility="Visible" DataContext="{Binding Path=Sidebar}"
                                           x:Name="sidebarControl" Grid.Column="2" HorizontalAlignment="Stretch"
-                                          VerticalAlignment="Stretch" MinWidth="150" />
-                    -->
+                                          VerticalAlignment="Stretch" MinWidth="200" />
+                    
                 </Grid>
             </TabItem>
             <TabItem >
                 <TabItem.Header>
-                    <TextBlock Margin="10,7,10,7" Text="{Binding  Source=SniperTabTitle, Converter={StaticResource ResourceKey=I18NConveter}, FallbackValue=MAPS}"/>
+                    <TextBlock  FontSize="15" Margin="7,5,7,5" Text="{Binding  Source=SniperTabTitle, Converter={StaticResource ResourceKey=I18NConveter}, FallbackValue=MAPS}"/>
                 </TabItem.Header>
                 
                 <local:SniperControl x:Name="ctrlSniper" DataContext="{Binding Path=SnipeList}" />
             </TabItem>
 
-            <TabItem Header="{Binding Source=ConsoleTabTitle, Converter={StaticResource ResourceKey=I18NConveter}, FallbackValue=Console}" IsSelected="True">
+            <TabItem  IsSelected="True">
+                <TabItem.Header>
+                    <TextBlock FontSize="15" Text="{Binding Source=ConsoleTabTitle, Converter={StaticResource ResourceKey=I18NConveter}, FallbackValue=Console}"/>
+                </TabItem.Header>
                 <DockPanel LastChildFill="True">
                     <TextBox HorizontalAlignment="Stretch" 
                              Name="txtCmdInput" 
@@ -199,7 +308,7 @@
                              Foreground="White" 
                              BorderBrush="Aquamarine" 
                              BorderThickness="1" 
-                             Text="Enter your command" 
+                             ToolTip="{Binding Source=InputCommand, Converter={StaticResource ResourceKey=I18NConveter}}" 
                              MouseDown="txtCmdInput_MouseDown"
                              KeyDown="txtCmdInput_KeyDown"
                              />
@@ -226,14 +335,14 @@
 
             </TabItem>
 
-            <TabItem Header="{Binding Path= PokemonTabHeader, FallbackValue=Pokemon}" Name="tabPokemons">
+            <TabItem FontSize="15" Header="{Binding Path= PokemonTabHeader, FallbackValue=Pokemon}" Name="tabPokemons">
                 <local:PokemonInventory x:Name="ctrPokemonInventory" DataContext="{Binding Path=PokemonList}"
                                         OnPokemonItemSelected="PokemonInventory_OnPokemonItemSelected" />
             </TabItem>
-            <TabItem Name="tabItems" Header="{Binding Path=ItemsTabHeader, FallbackValue=Pokemon}">
+            <TabItem FontSize="15" Name="tabItems" Header="{Binding Path=ItemsTabHeader, FallbackValue=Pokemon}">
                 <local:ItemsInventory DataContext="{Binding Path=ItemsList}" x:Name="ctrlItemControl" />
             </TabItem>
-            <TabItem Name="tabEggs" Header="{Binding Source=EggTabHeader , Converter={StaticResource I18NConveter}}">
+            <TabItem FontSize="15" Name="tabEggs" Header="{Binding Source=EggTabHeader , Converter={StaticResource I18NConveter}}">
                 <local:EggsControl DataContext="{Binding Path=EggsList}" x:Name="ctrlEggsControl" />
             </TabItem>
         </TabControl>

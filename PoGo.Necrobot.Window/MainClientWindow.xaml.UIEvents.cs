@@ -13,6 +13,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TinyIoC;
 
 namespace PoGo.Necrobot.Window
 {
@@ -54,9 +55,9 @@ namespace PoGo.Necrobot.Window
         {
             this.datacontext.PokemonList.OnEvolved(ev);
         }
-        public void OnBotEvent(PokemonCaptureEvent inventory)
+        public void OnBotEvent(PokemonCaptureEvent capture)
         {
-            this.datacontext.Sidebar.AddOrUpdate(new CatchPokemonViewModel(inventory));
+            this.datacontext.Sidebar.AddOrUpdate(new CatchPokemonViewModel(capture));
         }
         public void OnBotEvent(LoginEvent ev)
         {
@@ -98,7 +99,7 @@ namespace PoGo.Necrobot.Window
 
             this.datacontext.PokemonList.Update(pokemons);
             this.datacontext.RaisePropertyChanged("PokemonTabHeader");
-            
+
             UIUpdateSafe(() =>
              {
                  tabPokemons.Header = $"   Pokemons ({this.datacontext.Pokemons.Count}/{maxPokemonStorage})   ";
@@ -144,6 +145,10 @@ namespace PoGo.Necrobot.Window
             lblAccount.Content = $"{this.datacontext.UI.PlayerStatus} as : {this.datacontext.UI.PlayerName}";
 
         }
+        public void OnBotEvent(RenamePokemonEvent renamePokemonEvent)
+        {
+            this.datacontext.PokemonList.OnRename(renamePokemonEvent);
+        }
         public void OnBotEvent(TransferPokemonEvent transferedPkm)
         {
             this.datacontext.PokemonList.OnTransfer(transferedPkm);
@@ -154,7 +159,8 @@ namespace PoGo.Necrobot.Window
         }
         public void OnBotEvent(FortUsedEvent ev)
         {
-            this.botMap.MarkFortAsLooted(ev.Id);
+            this.datacontext.Sidebar.AddOrUpdate(new PokestopItemViewModel(ev));
+            this.botMap.MarkFortAsLooted(ev.Fort);
         }
         public void OnBotEvent(PokeStopListEvent ev)
         {
@@ -163,10 +169,22 @@ namespace PoGo.Necrobot.Window
         public void OnBotEvent(UpdatePositionEvent ev)
         {
             this.botMap.UpdatePlayerPosition(ev.Latitude, ev.Longitude);
+            this.datacontext.PlayerInfo.UpdateSpeed(ev.Speed);
         }
         public void OnBotEvent(AutoSnipePokemonAddedEvent ev)
         {
             datacontext.SnipeList.OnSnipeItemQueue(ev.EncounteredEvent);
+        }
+        public void OnBotEvent(PokestopLimitUpdate ev)
+        {
+            this.datacontext.PlayerInfo.UpdatePokestopLimit(ev);
+        }
+        public void OnBotEvent(CatchLimitUpdate ev)
+        {
+            this.datacontext.PlayerInfo.UpdateCatchLimit(ev);
+        }
+        public void OnBotEvent(IEvent evt)
+        {
         }
         internal void HandleBotEvent(IEvent evt)
         {
@@ -186,8 +204,7 @@ namespace PoGo.Necrobot.Window
                     }
                 });
             });
+        }
+        #endregion
     }
-    #endregion
-
-}
 }

@@ -52,13 +52,12 @@ namespace PoGo.NecroBot.Logic.State
         List<BotActions> Actions { get; }
         CancellationTokenSource CancellationTokenSource { get; set; }
         MemoryCache Cache { get; set; }
-        List<AuthConfig> Accounts { get; }
         DateTime LoggedTime { get; set; }
         DateTime CatchBlockTime { get; set; }
         Statistics RuntimeStatistics { get; }
-
-        void BlockCurrentBot(int expired = 15);
         GymTeamState GymState { get; set; }
+        double KnownLatitudeBeforeSnipe { get; set; }
+        double KnownLongitudeBeforeSnipe { get; set; }
     }
 
     public class Session : ISession
@@ -165,6 +164,8 @@ namespace PoGo.NecroBot.Logic.State
 
         public void Reset(ISettings settings, ILogicSettings logicSettings)
         {
+            this.KnownLatitudeBeforeSnipe = 0; 
+            this.KnownLongitudeBeforeSnipe = 0;
             Client = new Client(settings);
             // ferox wants us to set this manually
             Inventory = new Inventory(this, Client, logicSettings, () =>
@@ -175,7 +176,8 @@ namespace PoGo.NecroBot.Logic.State
             });
             Navigation = new Navigation(Client, logicSettings);
             Navigation.WalkStrategy.UpdatePositionEvent +=
-                (session, lat, lng) => this.EventDispatcher.Send(new UpdatePositionEvent {Latitude = lat, Longitude = lng});
+                (session, lat, lng,s) => this.EventDispatcher.Send(new UpdatePositionEvent {Latitude = lat, Longitude = lng, Speed = s});
+
             Navigation.WalkStrategy.UpdatePositionEvent += LoadSaveState.SaveLocationToDisk;
         }
 
@@ -189,7 +191,7 @@ namespace PoGo.NecroBot.Logic.State
 
             var manager = TinyIoCContainer.Current.Resolve<MultiAccountManager>();
 
-            var nextBot = bot == null? manager.GetSwitchableAccount() : bot;
+            var nextBot = manager.GetSwitchableAccount(bot);
 
             this.Settings.AuthType = nextBot.AuthType;
             this.Settings.GooglePassword = nextBot.GooglePassword;
@@ -255,16 +257,9 @@ namespace PoGo.NecroBot.Logic.State
             }
             return false; //timedout
         }
-
-        public void BlockCurrentBot(int expired = 60)
-        {
-            var currentAccount = this.accounts.FirstOrDefault(
-                x => (x.AuthType == AuthType.Ptc && x.PtcUsername == this.Settings.PtcUsername) ||
-                     (x.AuthType == AuthType.Google && x.GoogleUsername == this.Settings.GoogleUsername));
-
-            currentAccount.ReleaseBlockTime = DateTime.Now.AddMinutes(expired);
-        }
-
         public GymTeamState GymState { get; set; }
+
+        public double KnownLatitudeBeforeSnipe { get; set; }
+        public double KnownLongitudeBeforeSnipe { get; set; }
     }
 }

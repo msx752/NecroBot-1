@@ -1,4 +1,5 @@
 ﻿using LiteDB;
+using PoGo.NecroBot.Logic.Exceptions;
 using PoGo.NecroBot.Logic.Forms;
 using PoGo.NecroBot.Logic.Model.Settings;
 using PoGo.NecroBot.Logic.State;
@@ -7,6 +8,7 @@ using POGOProtos.Networking.Responses;
 using PokemonGo.RocketAPI.Enums;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Runtime.Caching;
 using System.Text;
@@ -22,7 +24,7 @@ namespace PoGo.NecroBot.Logic
     {
         private const string ACCOUNT_DB_NAME = "accounts.db";
 
-        public class BotAccount : AuthConfig
+        public class BotAccount : AuthConfig , INotifyPropertyChanged
         {
             public bool IsRunning { get; set; }
             public BotAccount() { }
@@ -42,6 +44,14 @@ namespace PoGo.NecroBot.Logic
             public DateTime LoggedTime { get; set; }
             public int Level { get; set; }
 
+            public event PropertyChangedEventHandler PropertyChanged;
+
+            public void RaisePropertyChanged(string propertyName)
+            {
+                PropertyChangedEventHandler handler = PropertyChanged;
+                if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
+            }
+
             public string GetRuntime()
             {
                 int day = (int)this.RuntimeTotal / 1440;
@@ -58,6 +68,17 @@ namespace PoGo.NecroBot.Logic
             LoadDataFromDB();
             SyncDatabase(accounts);
 
+        }
+
+        public void BlockCurrentBot(int expired = 60)
+        {
+            var session = TinyIoCContainer.Current.Resolve<ISession>();
+            var currentAccount = this.Accounts.FirstOrDefault(
+                x => (x.AuthType == AuthType.Ptc && x.PtcUsername == session.Settings.PtcUsername) ||
+                     (x.AuthType == AuthType.Google && x.GoogleUsername == session.Settings.GoogleUsername));
+
+            currentAccount.ReleaseBlockTime = DateTime.Now.AddMinutes(expired);
+            UpdateDatabase(currentAccount);
         }
 
         private void LoadDataFromDB()
@@ -88,30 +109,44 @@ namespace PoGo.NecroBot.Logic
 
                     if (existing == null)
                     {
-                        BotAccount newAcc = new BotAccount(item);
-                        newAcc.Id = this.Accounts.Count == 0 ? 1 : this.Accounts.Max(x => x.Id) + 1;
-                        accountdb.Insert(newAcc);
-                        this.Accounts.Add(newAcc);
+                        try {
+                            BotAccount newAcc = new BotAccount(item);
+                            newAcc.Id = this.Accounts.Count == 0 ? 1 : this.Accounts.Max(x => x.Id) + 1;
+                            accountdb.Insert(newAcc);
+                            this.Accounts.Add(newAcc);
+                        }
+                        catch(Exception)
+                        {
+                            Logic.Logging.Logger.Write("Error while saving data into accounts.db, please delete account.db and restart bot to have it fully work in order");
+                        }
                     }
                 }
 
             }
         }
 
-        internal BotAccount GetMinRuntime()
+        internal BotAccount GetMinRuntime(bool ignoreBlockCheck= false)
         {
-            return this.Accounts.OrderBy(x => x.RuntimeTotal).Where(x => x.ReleaseBlockTime < DateTime.Now).FirstOrDefault();
+            return this.Accounts.OrderBy(x => x.RuntimeTotal).Where(x => !ignoreBlockCheck || x.ReleaseBlockTime < DateTime.Now).FirstOrDefault();
         }
 
-        public void Add(AuthConfig authConfig)
+        public BotAccount Add(AuthConfig authConfig)
         {
             SyncDatabase(new List<AuthConfig>() { authConfig });
+
+            return this.Accounts.Last();
         }
 
         public BotAccount GetStartUpAccount()
         {
-            runningAccount = GetMinRuntime();
             ISession session = TinyIoC.TinyIoCContainer.Current.Resolve<ISession>();
+
+            if (!session.LogicSettings.AllowMultipleBot)
+            {
+                runningAccount = Accounts.Last();
+            }
+            else
+            runningAccount = GetMinRuntime(true);
 
             if (session.LogicSettings.AllowMultipleBot
               && session.LogicSettings.MultipleBotConfig.SelectAccountOnStartUp)
@@ -181,7 +216,18 @@ namespace PoGo.NecroBot.Logic
             //return bot;
         }
 
-        public BotAccount GetSwitchableAccount()
+        private DateTime disableSwitchTime = DateTime.MinValue;
+        internal void DisableSwitchAccountUntil(DateTime untilTime)
+        {
+            if (disableSwitchTime < untilTime) disableSwitchTime = untilTime;
+        }
+
+        public bool AllowSwitch()
+        {
+            return disableSwitchTime < DateTime.Now;
+        }
+
+        public BotAccount GetSwitchableAccount(BotAccount bot = null)
         {
             var session = TinyIoCContainer.Current.Resolve<ISession>();
             var currentAccount = this.Accounts.FirstOrDefault(
@@ -189,65 +235,106 @@ namespace PoGo.NecroBot.Logic
                      (x.AuthType == AuthType.Google && x.GoogleUsername == session.Settings.GoogleUsername));
 
 
-            var current = this.Accounts.FirstOrDefault(x => x.IsRunning);
-            if (current != null)
+            if (currentAccount != null)
             {
-                current.RuntimeTotal += (DateTime.Now - current.LoggedTime).TotalMinutes;
-                current.IsRunning = false;
+                Logic.Logging.Logger.Debug($"Current account {currentAccount.PtcUsername}");
+                currentAccount.IsRunning = false;
 
-                var playerStats = (session.Inventory.GetPlayerStats()).FirstOrDefault();
-                current.Level = playerStats.Level;
-
-                UpdateDatabase(current);
-            }
-
-            this.Accounts = this.Accounts.OrderByDescending(p => p.RuntimeTotal).ToList();
-            var first = this.Accounts.First();
-            if (first.RuntimeTotal >= 100000)
-            {
-                first.RuntimeTotal = this.Accounts.Min(p => p.RuntimeTotal);
-            }
-
-            runningAccount = Accounts.LastOrDefault(p => p != currentAccount && p.ReleaseBlockTime < DateTime.Now);
-            if (runningAccount != null)
-            {
-                Logging.Logger.Write($"Switching to {runningAccount.GoogleUsername}{runningAccount.PtcUsername}...");
-
-                string body = "";
-                foreach (var item in this.Accounts)
+                if (session.LoggedTime != DateTime.MinValue)
                 {
-                    int day = (int)item.RuntimeTotal / 1440;
-                    int hour = (int)(item.RuntimeTotal - (day * 1400)) / 60;
-                    int min = (int)(item.RuntimeTotal - (day * 1400) - hour * 60);
-                    body = body + $"{item.GoogleUsername}{item.PtcUsername}     {item.GetRuntime()}\r\n";
+                    var playerStats = (session.Inventory.GetPlayerStats()).FirstOrDefault();
+                    currentAccount.Level = playerStats.Level;
+                    currentAccount.RuntimeTotal += (DateTime.Now - currentAccount.LoggedTime).TotalMinutes;
+
                 }
 
-#pragma warning disable 4014 // added to get rid of compiler warning. Remove this if async code is used below.
-                SendNotification(session, $"Account changed to {runningAccount.GoogleUsername}{runningAccount.PtcUsername}", body);
-#pragma warning restore 4014
-                //DumpAccountList();
-
+                UpdateDatabase(currentAccount);
             }
-            else
-            {
 
-                var pauseTime = session.LogicSettings.MultipleBotConfig.OnLimitPauseTimes;
+            if (bot != null)
+            {
+                
+                runningAccount = bot;
+                
+            }
+            else {
+
+                this.Accounts = this.Accounts.OrderByDescending(p => p.RuntimeTotal).ToList();
+                var first = this.Accounts.First();
+                if (first.RuntimeTotal >= 100000)
+                {
+                    first.RuntimeTotal = this.Accounts.Min(p => p.RuntimeTotal);
+                }
+
+                runningAccount = Accounts.LastOrDefault(p => p != currentAccount && p.ReleaseBlockTime < DateTime.Now);
+                if (runningAccount != null)
+                {
+                    Logging.Logger.Write($"Switching to {runningAccount.GoogleUsername}{runningAccount.PtcUsername}...");
+
+                    string body = "";
+                    foreach (var item in this.Accounts)
+                    {
+                        int day = (int)item.RuntimeTotal / 1440;
+                        int hour = (int)(item.RuntimeTotal - (day * 1400)) / 60;
+                        int min = (int)(item.RuntimeTotal - (day * 1400) - hour * 60);
+                        body = body + $"{item.GoogleUsername}{item.PtcUsername}     {item.GetRuntime()}\r\n";
+                    }
+
 #pragma warning disable 4014 // added to get rid of compiler warning. Remove this if async code is used below.
-                SendNotification(session, "All accounts are being blocked", $"None of yours account available to switch, bot will sleep for {pauseTime} mins until next acount available to run", true);
+                    SendNotification(session, $"Account changed to {runningAccount.GoogleUsername}{runningAccount.PtcUsername}", body);
+#pragma warning restore 4014
+                    //DumpAccountList();
+
+                }
+                else
+                {
+
+                    var pauseTime = session.LogicSettings.MultipleBotConfig.OnLimitPauseTimes;
+#pragma warning disable 4014 // added to get rid of compiler warning. Remove this if async code is used below.
+                    SendNotification(session, "All accounts are being blocked", $"None of yours account available to switch, bot will sleep for {pauseTime} mins until next acount available to run", true);
 #pragma warning restore 4014
 
-                Task.Delay(pauseTime * 60 * 1000).Wait();
-                return GetSwitchableAccount();
+                    Task.Delay(pauseTime * 60 * 1000).Wait();
+                    return GetSwitchableAccount();
+                }
+            }
+            //overkill
+            foreach (var item in this.Accounts)
+            {
+                item.IsRunning = false;
+                UpdateDatabase(item);
             }
             runningAccount.IsRunning = true;
             runningAccount.LoggedTime = DateTime.Now;
+            
             UpdateDatabase(runningAccount);
 
             return runningAccount;
         }
+
+        private bool switchAccountRequest = false;
+        public void SwitchAccountTo(BotAccount account)
+        {
+            this.requestedAccount = account;
+            this.switchAccountRequest = true;
+        }
+
+        public void ThrowIfSwitchAccountRequested()
+        {
+            if (switchAccountRequest && this.requestedAccount != null && !this.requestedAccount.IsRunning)
+            {
+                switchAccountRequest = false;
+                throw new ActiveSwitchAccountManualException(this.requestedAccount);
+            }
+        }
+
+        private BotAccount requestedAccount = null;
         private BotAccount runningAccount;
         private void UpdateDatabase(BotAccount current)
         {
+            current.RaisePropertyChanged("RuntimeTotal");
+                current.RaisePropertyChanged("IsRunning");
+
             using (var db = new LiteDatabase(ACCOUNT_DB_NAME))
             {
                 var accountdb = db.GetCollection<BotAccount>("accounts");
