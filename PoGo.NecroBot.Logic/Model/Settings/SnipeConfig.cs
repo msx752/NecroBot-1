@@ -7,8 +7,7 @@ namespace PoGo.NecroBot.Logic.Model.Settings
     [JsonObject(Title = "Snipe Config", Description = "Set your snipe settings.", ItemRequired = Required.DisallowNull)]
     public class SnipeConfig : BaseConfig
     {
-        public SnipeConfig() : base() {}
-        [NecrobotConfig (Description = "Tell bot to use location service, detail at  - https://github.com/5andr0/PogoLocationFeeder", Position =1)]
+        [NecrobotConfig(Description = "Tell bot to use location service, detail at  - https://github.com/5andr0/PogoLocationFeeder", Position = 1)]
         [DefaultValue(false)]
         [JsonProperty(Required = Required.DisallowNull, DefaultValueHandling = DefaultValueHandling.Populate, Order = 1)]
         public bool UseSnipeLocationServer { get; set; }
@@ -26,31 +25,6 @@ namespace PoGo.NecroBot.Logic.Model.Settings
         [Range(1, 65535)]
         [JsonProperty(Required = Required.DisallowNull, DefaultValueHandling = DefaultValueHandling.Populate, Order = 3)]
         public int SnipeLocationServerPort { get; set; }
-
-        [NecrobotConfig(Description = "Tell bot to connect to PokeZZ to get data - nolonger work. ", Position = 4)]
-        [DefaultValue(false)]
-        [JsonProperty(Required = Required.DisallowNull, DefaultValueHandling = DefaultValueHandling.Populate, Order = 4)]
-        public bool GetSniperInfoFromPokezz { get; set; }
-
-        [NecrobotConfig(Description = "Tell bot to get only verified pokemon from PokeZZ  for snipe - nolonger work. ", Position = 5)]
-        [DefaultValue(true)]
-        [JsonProperty(Required = Required.DisallowNull, DefaultValueHandling = DefaultValueHandling.Populate, Order = 5)]
-        public bool GetOnlyVerifiedSniperInfoFromPokezz { get; set; }
-
-        [NecrobotConfig(Description = "Tell bot to connect to pokesnipers.com to get sniper data - nolonger work. ", Position = 6)]
-        [DefaultValue(false)]
-        [JsonProperty(Required = Required.DisallowNull, DefaultValueHandling = DefaultValueHandling.Populate, Order = 6)]
-        public bool GetSniperInfoFromPokeSnipers { get; set; }
-
-        [NecrobotConfig(Description = "Tell bot to connect to pokewatchers.com to get sniper data - nolonger work. ", Position = 7)]
-        [DefaultValue(false)]
-        [JsonProperty(Required = Required.DisallowNull, DefaultValueHandling = DefaultValueHandling.Populate, Order = 7)]
-        public bool GetSniperInfoFromPokeWatchers { get; set; }
-
-        [NecrobotConfig(Description = "Tell bot to connect to snippedlagged.com to get sniper data - nolonger work. ", Position = 8)]
-        [DefaultValue(false)]
-        [JsonProperty(Required = Required.DisallowNull, DefaultValueHandling = DefaultValueHandling.Populate, Order = 8)]
-        public bool GetSniperInfoFromSkiplagged { get; set; }
 
         [NecrobotConfig(Description = "Number of ball in inventory to get sniper function work. ", Position = 9)]
         [DefaultValue(20)]

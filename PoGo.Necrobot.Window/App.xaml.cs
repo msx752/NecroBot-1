@@ -1,10 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
 using System.Diagnostics;
-using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Navigation;
@@ -35,6 +30,7 @@ namespace PoGo.Necrobot.Window
         private void ErrorHandler(object sender, UnhandledExceptionEventArgs e)
         {
             Debug.WriteLine(e.ExceptionObject.ToString());
+            ConsoleHelper.ShowConsoleWindow();
         }
 
         protected override void OnStartup(StartupEventArgs e)
@@ -60,8 +56,15 @@ namespace PoGo.Necrobot.Window
 
             if (File.Exists(configFile))
             {
-                var config = GlobalSettings.Load(subPath, validateJSON);
-                languageCode = config.ConsoleConfig.TranslationLanguageCode;
+                try {
+                    var config = GlobalSettings.Load(subPath, validateJSON);
+                    languageCode = config.ConsoleConfig.TranslationLanguageCode;
+                }
+                catch(Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Config error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    Shutdown();
+                }
             }
 
             if (!Directory.Exists(translationsDir))

@@ -27,6 +27,8 @@ using PoGo.NecroBot.Logic.Common;
 using System.ServiceModel.Syndication;
 using System.Net;
 using System.Xml;
+using System.IO;
+using System.Net.Http;
 
 namespace PoGo.Necrobot.Window
 {
@@ -225,12 +227,7 @@ namespace PoGo.Necrobot.Window
                 }
             }
         }
-
-        private void menuAuth_Click(object sender, RoutedEventArgs e)
-        {
-            popAccounts.IsOpen = true;
-        }
-
+        
         private void btnDonate_Click(object sender, RoutedEventArgs e)
         {
             Process.Start("http://snipe.necrobot2.com?donate");
@@ -251,11 +248,13 @@ namespace PoGo.Necrobot.Window
         {
             if (lastTimeLoadHelp < DateTime.Now.AddMinutes(-30))
             {
-                var feed = SyndicationFeed.Load(XmlReader.Create("http://necrobot2.com/feed.xml"));
+                var client = new WebClient();
+                var xml = await client.DownloadStringTaskAsync(new Uri("http://necrobot2.com/feed.xml"));
+                var feed = SyndicationFeed.Load(XmlReader.Create(new StringReader(xml)));
                 lastTimeLoadHelp = DateTime.Now;
                 this.Dispatcher.Invoke(() =>
                 {
-                    lsvHelps.ItemsSource = feed.Items.OrderByDescending(x=>x.PublishDate);
+                    lsvHelps.ItemsSource = feed.Items.OrderByDescending(x => x.PublishDate);
                 });
             }
         }
@@ -273,6 +272,17 @@ namespace PoGo.Necrobot.Window
             
             Process.Start(hlink.NavigateUri.ToString());
             popHelpArticles.IsOpen = false;
+        }
+
+        private void btnExit_Click(object sender, RoutedEventArgs e)
+        {
+            Application.Current.Shutdown();
+        }
+        
+        private void MetroWindow_Initialized(object sender, EventArgs e)
+        {
+            if(System.Windows.SystemParameters.PrimaryScreenWidth<1366)
+            this.WindowState = WindowState.Maximized;
         }
     }
 }

@@ -103,7 +103,7 @@ namespace PoGo.NecroBot.CLI
                 clientData.Pokemons.Add(eve);
             }
         }
-        private static SnipePokemonUpdateEvent lastEncouteredEvent;
+        //private static SnipePokemonUpdateEvent lastEncouteredEvent;
         private static void HandleEvent(SnipePokemonUpdateEvent eve, ISession session)
         {
             lock(clientData)
@@ -156,7 +156,7 @@ namespace PoGo.NecroBot.CLI
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            while (true)
+            while (true && !termintated)
             {
                 var socketURL = servers.Dequeue();
                 Logger.Write($"Connecting to {socketURL} ....");
@@ -184,7 +184,7 @@ namespace PoGo.NecroBot.CLI
                 ws.OnMessage += (sender, e) => { onSocketMessageRecieved(session, sender, e); };
 
                 ws.Connect();
-                while (true)
+                while (true && !termintated)
                 {
                     try
                     {
@@ -209,7 +209,7 @@ namespace PoGo.NecroBot.CLI
                             ws.Connect();
                         }
 
-                        while (ws.ReadyState == WebSocketState.Open)
+                        while (ws.ReadyState == WebSocketState.Open && !termintated)
                         {
                             //Logger.Write("Connected to necrobot data service.");
                             retries = 0;
@@ -257,29 +257,29 @@ namespace PoGo.NecroBot.CLI
                 OnPokemonData(session, e.Data);
                 OnSnipePokemon(session, e.Data);
                 OnServerMessage(session, e.Data);
-                //ONFPMBridgeData(session, e.Data); //Nolonger use
             }
-
-#pragma warning disable 0168 // Comment Suppress compiler warning - ex is used in DEBUG section
             catch (Exception ex)
-#pragma warning restore 0168
             {
-                // Comment Suppress compiler warning - ex is used in DEBUG section
-#if DEBUG
-                Logger.Write("ERROR TO ADD SNIPE< DEBUG ONLY " + ex.Message + "\r\n " + ex.StackTrace,
-                    Logic.Logging.LogLevel.Info, ConsoleColor.Yellow);
-#endif
+                Logger.Debug("ERROR TO ADD SNIPE< DEBUG ONLY " + ex.Message + "\r\n " + ex.StackTrace);
             }
         }
 
+        private static DateTime lastWarningMessage = DateTime.MinValue;
+        private static bool termintated = false;
         private static void OnServerMessage(ISession session, string message)
         {
             var match = Regex.Match(message, "42\\[\"server-message\",(.*)]");
             if (match != null && !string.IsNullOrEmpty(match.Groups[1].Value))
             {
+                if (message.Contains("The connection has been denied")) {
+                    termintated = true;
+                }
+                var messag = match.Groups[1].Value;
+                if (message.Contains("The connection has been denied") && lastWarningMessage > DateTime.Now.AddMinutes(-5)) return;
+                lastWarningMessage = DateTime.Now;
                 session.EventDispatcher.Send(new NoticeEvent()
                 {
-                    Message = "(SERVER) " + match.Groups[1].Value
+                    Message = "(SNIPE SERVER) " + match.Groups[1].Value
                 });
             }
         }
@@ -302,12 +302,13 @@ namespace PoGo.NecroBot.CLI
             ISession session)
         {
             string uniqueCacheKey =
-                $"{session.Settings.PtcUsername}{session.Settings.GoogleUsername}{Math.Round(lat, 6)}{id}{Math.Round(lng, 6)}";
+                $"{session.Settings.Username}{Math.Round(lat, 6)}{id}{Math.Round(lng, 6)}";
             if (session.Cache.Get(uniqueCacheKey) != null) return true;
             if (encounterId > 0 && session.Cache[encounterId.ToString()] != null) return true;
 
             return false;
         }
+
         private static void OnPokemonUpdateData(ISession session, string message)
         {
             var match = Regex.Match(message, "42\\[\"pokemon-update\",(.*)]");
@@ -330,7 +331,7 @@ namespace PoGo.NecroBot.CLI
 
         private static MemoryCache cache = new MemoryCache("dump");
 
-        static int count = 0;
+        //static int count = 0;
         private static void OnPokemonData(ISession session, string message)
         {
             var match = Regex.Match(message, "42\\[\"pokemon\",(.*)]");

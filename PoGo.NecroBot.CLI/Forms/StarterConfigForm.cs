@@ -52,16 +52,8 @@ namespace PoGo.NecroBot.CLI.Forms
         private void wizardPage2_Commit(object sender, WizardPageConfirmEventArgs e)
         {
             this.settings.Auth.AuthConfig.AuthType = comboBox1.Text == "ptc" ? AuthType.Ptc : AuthType.Google;
-            if (this.settings.Auth.AuthConfig.AuthType == AuthType.Ptc)
-            {
-                this.settings.Auth.AuthConfig.PtcUsername = txtUsername.Text;
-                this.settings.Auth.AuthConfig.PtcPassword = txtPassword.Text;
-            }
-            else
-            {
-                this.settings.Auth.AuthConfig.GoogleUsername = txtUsername.Text;
-                this.settings.Auth.AuthConfig.GooglePassword = txtPassword.Text;
-            }
+            this.settings.Auth.AuthConfig.Username = txtUsername.Text;
+            this.settings.Auth.AuthConfig.Password = txtPassword.Text;
         }
 
         private void SelectLanguagePage_Commit(object sender, WizardPageConfirmEventArgs e)
@@ -94,13 +86,13 @@ namespace PoGo.NecroBot.CLI.Forms
         private void wizardControl1_Finished(object sender, EventArgs e)
         {
             GlobalSettings.SaveFiles(settings, this.configFile);
-            new Session(new ClientSettings(settings, elevationService), new LogicSettings(settings), elevationService);
+            new Session(settings,new ClientSettings(settings, elevationService), new LogicSettings(settings), elevationService);
             Logger.Write(Session.Translation.GetTranslation(TranslationString.FirstStartSetupCompleted), LogLevel.Info);
         }
 
         private void SelectLanguagePage_Click(object sender, EventArgs e)
         {
-            this.Session = new Session(
+            this.Session = new Session(settings,
                 new ClientSettings(settings, elevationService),
                 new LogicSettings(settings),
                 elevationService
@@ -119,7 +111,7 @@ namespace PoGo.NecroBot.CLI.Forms
         {
             DialogResult = DialogResult.OK;
             GlobalSettings.SaveFiles(settings, this.configFile);
-            new Session(new ClientSettings(settings, elevationService), new LogicSettings(settings), elevationService);
+            new Session(settings,new ClientSettings(settings, elevationService), new LogicSettings(settings), elevationService);
             Logger.Write(Session.Translation.GetTranslation(TranslationString.FirstStartSetupCompleted), LogLevel.Info);
 
             this.Close();

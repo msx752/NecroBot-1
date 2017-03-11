@@ -8,7 +8,7 @@ namespace PoGo.NecroBot.Logic.Event
 
         public override string ToString()
         {
-            return PokemonFound.Id.ToString();
+            return string.Empty;//remove this later
         }
     }
 }

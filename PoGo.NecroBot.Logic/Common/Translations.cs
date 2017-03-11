@@ -161,6 +161,7 @@ namespace PoGo.NecroBot.Logic.Common
         GoogleTwoFactorAuthExplanation,
         GoogleError,
         GoogleOffline,
+        MissingCredentials,
         MissingCredentialsGoogle,
         MissingCredentialsPtc,
         SnipeScan,
@@ -317,7 +318,8 @@ namespace PoGo.NecroBot.Logic.Common
         TelegramCommandLocMsgHead,
         TelegramCommandProfileMsgBody,
         TelegramCommandStatusMsgBody,
-        MultiAccountAutoSelect
+        MultiAccountAutoSelect,
+        PtcLoginFail
     }
 
     public class Translation : ITranslation
@@ -331,6 +333,7 @@ namespace PoGo.NecroBot.Logic.Common
         private readonly List<KeyValuePair<TranslationString, string>> _translationStrings = new List
             <KeyValuePair<TranslationString, string>>
             {
+              new KeyValuePair<TranslationString, string>(TranslationString.PtcLoginFail, "Your PTC account is wrong password, or being lock, or not active"),
                 new KeyValuePair<TranslationString, string>(TranslationString.MultiAccountAutoSelect, "PLEASE SELECT AN ACCOUNT TO START. AUTO START AFTER {0} SECOND"),
                 new KeyValuePair<TranslationString, string>(TranslationString.WebSocketStarted, "Websocket listening on at  wss://localhost:{0} or ws://localhost:{1} "),
                 new KeyValuePair<TranslationString, string>(TranslationString.TargetLocationSet,
@@ -373,7 +376,7 @@ namespace PoGo.NecroBot.Logic.Common
 
                 //Logging Cleanup (mostly uneccessary information, may want a verbose pokemon capture logger setting)
                 new KeyValuePair<TranslationString, string>(TranslationString.EventPokemonCaptureSuccess,
-                    "({0}) | ({1}) {2} Lvl: {3} CP: ({4}/{5}) IV: {6}% | Chance: {7}% | {8}m dist | with a {9} ({10} left). | {11} EXP earned | {12} | lat: {13} long: {14} | Move1: {15} Move2: {16} | Rarity: {17} | Capture Reason: {18}"),
+                    "({0}) | ({1}) {2} Lvl: {3} CP: ({4}/{5}) IV: {6}% | Chance: {7}% | {8}m dist | with a {9} ({10} left). | {11} EXP earned | {12} | lat: {13} long: {14} | Move1: {15} Move2: {16} | Rarity: {17} | Capture Reason: {18} | Sex: {19}"),
                 new KeyValuePair<TranslationString, string>(TranslationString.EventPokemonCaptureFailed,
                     "({0}) | ({1}) {2} Lvl: {3} CP: ({4}/{5}) IV: {6}% | Chance: {7}% | {8}m dist | with a {9} ({10} left). | lat: {11} long: {12} | Move1: {13} Move2: {14} | Rarity :{15}"),
 
@@ -560,6 +563,8 @@ namespace PoGo.NecroBot.Logic.Common
                     "Make sure you have entered the right Email & Password."),
                 new KeyValuePair<TranslationString, string>(TranslationString.GoogleOffline,
                     "Google servers are probably down, Please be patient and start the bot later."),
+                new KeyValuePair<TranslationString, string>(TranslationString.MissingCredentials,
+                    "You need to fill out Username and Password in auth.json!"),
                 new KeyValuePair<TranslationString, string>(TranslationString.MissingCredentialsGoogle,
                     "You need to fill out GoogleUsername and GooglePassword in auth.json!"),
                 new KeyValuePair<TranslationString, string>(TranslationString.MissingCredentialsPtc,
@@ -752,7 +757,7 @@ namespace PoGo.NecroBot.Logic.Common
                     "Your are out of ball because snipe so fast, you can reduce snipe speed by update MinIVForAutoSnipe or SnipePokemonFilters, Auto snipe will be disable in {0} mins"),
                 new KeyValuePair<TranslationString, string>(TranslationString.SniperCount, "Sniper count {0}"),
                 new KeyValuePair<TranslationString, string>(TranslationString.SnipeExceeds,
-                    "Sniper need to take a rest before your account is banned"),
+                    "Sniper needs to take a rest before your account is banned"),
                 new KeyValuePair<TranslationString, string>(TranslationString.CatchExceeds,
                     "You are catching too fast. Your cannot catch another one until {0} seconds later"),
                 new KeyValuePair<TranslationString, string>(TranslationString.PokeStopExceeds,
@@ -776,7 +781,7 @@ namespace PoGo.NecroBot.Logic.Common
                 new KeyValuePair<TranslationString, string>(TranslationString.HumanWalkSnipeDestinationReached,
                     "(HUMAN WALK) destination reached | lat: {0}, lng: {1} | wait :{2:0.00} sec"),
                 new KeyValuePair<TranslationString, string>(TranslationString.HumanWalkSnipeNotEnoughtBalls,
-                    "(HUMAN WALK) Not enough balls to activate catch Em-All mode. ({0})/{1}"),
+                    "(HUMAN WALK) Not enough Pokeballs to activate catch Em-All mode. ({0})/{1}"),
                 new KeyValuePair<TranslationString, string>(TranslationString.HumanWalkSnipePokemonEncountered,
                     "(HUMAN WALK) Encountered {0}  | lat :{1} , Lng : {2} | removed from snipping list"),
                 new KeyValuePair<TranslationString, string>(TranslationString.MinimumClientVersionException,

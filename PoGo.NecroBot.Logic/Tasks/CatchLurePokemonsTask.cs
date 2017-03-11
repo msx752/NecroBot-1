@@ -19,6 +19,8 @@ using POGOProtos.Networking.Responses;
 
 namespace PoGo.NecroBot.Logic.Tasks
 {
+    //add delegate
+    public delegate void PokemonsEncounterLureDelegate(List<MapPokemon> pokemons);
     public static class CatchLurePokemonsTask
     {
         public static async Task Execute(ISession session, FortData currentFortData,
@@ -49,7 +51,7 @@ namespace PoGo.NecroBot.Logic.Tasks
             var pokemonId = currentFortData.LureInfo.ActivePokemonId;
 
             if ((session.LogicSettings.UsePokemonSniperFilterOnly &&
-                 !session.LogicSettings.PokemonToSnipe.Pokemon.Contains(pokemonId)) ||
+                 !session.LogicSettings.PokemonToCatchLocally.Pokemon.Contains(pokemonId)) ||
                 (session.LogicSettings.UsePokemonToNotCatchFilter &&
                  session.LogicSettings.PokemonsNotToCatch.Contains(pokemonId)))
             {
@@ -79,6 +81,9 @@ namespace PoGo.NecroBot.Logic.Tasks
                         SpawnPointId = currentFortData.Id
                     };
 
+                    //add delegate function
+                    OnPokemonEncounterEvent(new List<MapPokemon> { pokemon });
+
                     // Catch the Pokemon
                     await CatchPokemonTask.Execute(session, cancellationToken, encounter, pokemon,
                         currentFortData, sessionAllowTransfer: true);
@@ -95,6 +100,13 @@ namespace PoGo.NecroBot.Logic.Tasks
                             await TransferDuplicatePokemonTask.Execute(session, cancellationToken);
                         if (session.LogicSettings.TransferWeakPokemon)
                             await TransferWeakPokemonTask.Execute(session, cancellationToken);
+                        if (session.LogicSettings.EvolveAllPokemonAboveIv ||
+                            session.LogicSettings.EvolveAllPokemonWithEnoughCandy ||
+                            session.LogicSettings.UseLuckyEggsWhileEvolving ||
+                            session.LogicSettings.KeepPokemonsThatCanEvolve)
+                        {
+                            await EvolvePokemonTask.Execute(session, cancellationToken);
+                        }
                     }
                     else
                         session.EventDispatcher.Send(new WarnEvent
@@ -143,6 +155,13 @@ namespace PoGo.NecroBot.Logic.Tasks
                 }
             }
             ;
+        }
+        //add delegate event
+        public static event PokemonsEncounterLureDelegate PokemonEncounterEvent;
+
+        private static void OnPokemonEncounterEvent(List<MapPokemon> pokemons)
+        {
+            PokemonEncounterEvent?.Invoke(pokemons);
         }
     }
 }

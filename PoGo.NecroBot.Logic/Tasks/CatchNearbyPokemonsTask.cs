@@ -15,7 +15,8 @@ using POGOProtos.Inventory.Item;
 using POGOProtos.Map.Pokemon;
 using POGOProtos.Networking.Responses;
 using TinyIoC;
-using GeoCoordinatePortable;
+using System.Collections.Generic;
+using System.Device.Location;
 
 #endregion
 
@@ -23,29 +24,23 @@ namespace PoGo.NecroBot.Logic.Tasks
 {
     public static class CatchNearbyPokemonsTask
     {
+        //add delegate
+        public delegate void PokemonsEncounterDelegate(List<MapPokemon> pokemons);
+
         public static async Task Execute(ISession session, CancellationToken cancellationToken,
             PokemonId priority = PokemonId.Missingno, bool sessionAllowTransfer = true)
         {
             TinyIoC.TinyIoCContainer.Current.Resolve<MultiAccountManager>().ThrowIfSwitchAccountRequested();
             cancellationToken.ThrowIfCancellationRequested();
-            
-            //make sure not catch pokemon nearby at snipe locaiton.
-
-            //this code is not necsecssarily but still ok to leave here.
-
-            if(session.KnownLongitudeBeforeSnipe != 0 && session.KnownLatitudeBeforeSnipe != 0 && 
-                LocationUtils.CalculateDistanceInMeters(session.KnownLatitudeBeforeSnipe, 
-                session.KnownLongitudeBeforeSnipe, 
-                session.Client.CurrentLatitude, 
-                session.Client.CurrentLongitude) > 1000)
-            {
-                Logger.Write($"ERROR - Bot stucked at snipe location({session.Client.CurrentLatitude},{session.Client.CurrentLongitude}). Teleport him back home - if you see this message please PM samuraitruong");
-
-                session.Client.Player.SetCoordinates(session.KnownLatitudeBeforeSnipe, session.KnownLongitudeBeforeSnipe, session.Client.CurrentAltitude);
-                return;
-            }
 
             if (!session.LogicSettings.CatchPokemon) return;
+
+            var totalBalls = session.Inventory.GetItems().Where(x => x.ItemId == ItemId.ItemPokeBall || x.ItemId == ItemId.ItemGreatBall || x.ItemId == ItemId.ItemUltraBall).Sum(x => x.Count);
+
+            if (session.SaveBallForByPassCatchFlee && totalBalls < 130)
+            {
+                return ;
+            }
 
             if (session.Stats.CatchThresholdExceeds(session))
             {
@@ -70,6 +65,10 @@ namespace PoGo.NecroBot.Logic.Tasks
             if (nearbyPokemons == null) return;
             var priorityPokemon = nearbyPokemons.Where(p => p.PokemonId == priority).FirstOrDefault();
             var pokemons = nearbyPokemons.Where(p => p.PokemonId != priority).ToList();
+
+            //add pokemons to map
+            OnPokemonEncounterEvent(pokemons.ToList());
+
             EncounterResponse encounter = null;
             //if that is snipe pokemon and inventories if full, execute transfer to get more room for pokemon
             if (priorityPokemon != null)
@@ -82,8 +81,19 @@ namespace PoGo.NecroBot.Logic.Tasks
 
                 if (encounter.Status == EncounterResponse.Types.Status.PokemonInventoryFull)
                 {
-                    await TransferWeakPokemonTask.Execute(session, cancellationToken);
-                    await TransferDuplicatePokemonTask.Execute(session, cancellationToken);
+                    if (session.LogicSettings.TransferDuplicatePokemon)
+                        await TransferDuplicatePokemonTask.Execute(session, cancellationToken);
+
+                    if (session.LogicSettings.TransferWeakPokemon)
+                        await TransferWeakPokemonTask.Execute(session, cancellationToken);
+
+                    if (session.LogicSettings.EvolveAllPokemonAboveIv ||
+                        session.LogicSettings.EvolveAllPokemonWithEnoughCandy ||
+                        session.LogicSettings.UseLuckyEggsWhileEvolving ||
+                        session.LogicSettings.KeepPokemonsThatCanEvolve)
+                    {
+                        await EvolvePokemonTask.Execute(session, cancellationToken);
+                    }
                 }
             }
 
@@ -91,7 +101,6 @@ namespace PoGo.NecroBot.Logic.Tasks
             {
                 await MSniperServiceTask.Execute(session, cancellationToken);
                 
-                //should load it dynamic from - MapSettings.encounterRangeMeters_
                 if (LocationUtils.CalculateDistanceInMeters(pokemon.Latitude, pokemon.Longitude, session.Client.CurrentLatitude, session.Client.CurrentLongitude) > session.Client.GlobalSettings.MapSettings.EncounterRangeMeters)
                 {
                     Logger.Debug($"THIS POKEMON IS TOO FAR, {pokemon.Latitude}, {pokemon.Longitude}");
@@ -128,7 +137,7 @@ namespace PoGo.NecroBot.Logic.Tasks
                 if (session.CatchBlockTime > DateTime.Now) return;
 
                 if ((session.LogicSettings.UsePokemonSniperFilterOnly &&
-                     !session.LogicSettings.PokemonToSnipe.Pokemon.Contains(pokemon.PokemonId)) ||
+                     !session.LogicSettings.PokemonToCatchLocally.Pokemon.Contains(pokemon.PokemonId)) ||
                     (session.LogicSettings.UsePokemonToNotCatchFilter &&
                      session.LogicSettings.PokemonsNotToCatch.Contains(pokemon.PokemonId)))
                 {
@@ -170,6 +179,13 @@ namespace PoGo.NecroBot.Logic.Tasks
                             await TransferDuplicatePokemonTask.Execute(session, cancellationToken);
                         if (session.LogicSettings.TransferWeakPokemon)
                             await TransferWeakPokemonTask.Execute(session, cancellationToken);
+                        if (session.LogicSettings.EvolveAllPokemonAboveIv ||
+                            session.LogicSettings.EvolveAllPokemonWithEnoughCandy ||
+                            session.LogicSettings.UseLuckyEggsWhileEvolving ||
+                            session.LogicSettings.KeepPokemonsThatCanEvolve)
+                        {
+                            await EvolvePokemonTask.Execute(session, cancellationToken);
+                        }
                     }
                     else
                         session.EventDispatcher.Send(new WarnEvent
@@ -213,6 +229,13 @@ namespace PoGo.NecroBot.Logic.Tasks
                             i.Latitude, i.Longitude));
 
             return pokemons;
+        }
+        //add delegate event
+        public static event PokemonsEncounterDelegate PokemonEncounterEvent;
+
+        private static void OnPokemonEncounterEvent(List<MapPokemon> pokemons)
+        {
+            PokemonEncounterEvent?.Invoke(pokemons);
         }
     }
 }

@@ -13,6 +13,7 @@ namespace PoGo.NecroBot.Logic.Interfaces.Configuration
     {
         bool UseWebsocket { get; }
         bool CatchPokemon { get; }
+        bool ByPassCatchFlee { get; }
         int OutOfBallCatchBlockTime { get; }
         int PokeballsToKeepForSnipe { get; }
         int CatchPokemonLimit { get; }
@@ -79,6 +80,9 @@ namespace PoGo.NecroBot.Logic.Interfaces.Configuration
         int DelayBetweenPlayerActions { get; }
         bool UsePokemonToNotCatchFilter { get; }
         bool UsePokemonSniperFilterOnly { get; }
+        string SnipeLocationServer { get; }
+        int SnipeLocationServerPort { get; }
+        bool UseSnipeLocationServer { get; }
         int KeepMinDuplicatePokemon { get; }
         bool PrioritizeIvOverCp { get; }
         int AmountOfTimesToUpgradeLoop { get; }
@@ -109,6 +113,7 @@ namespace PoGo.NecroBot.Logic.Interfaces.Configuration
         string ProfilePath { get; }
         string ProfileConfigPath { get; }
         string GeneralConfigPath { get; }
+        int SchemaVersion { get; }
         bool SnipeAtPokestops { get; }
         bool ActivateMSniper { get; }
         bool UseTelegramAPI { get; }
@@ -117,18 +122,7 @@ namespace PoGo.NecroBot.Logic.Interfaces.Configuration
         int MinPokeballsToSnipe { get; }
         int MinPokeballsWhileSnipe { get; }
         int MaxPokeballsPerPokemon { get; }
-        string SnipeLocationServer { get; }
-        int SnipeLocationServerPort { get; }
-        bool GetSniperInfoFromPokezz { get; }
-        bool GetOnlyVerifiedSniperInfoFromPokezz { get; }
-        bool GetSniperInfoFromPokeSnipers { get; }
-        bool GetSniperInfoFromPokeWatchers { get; }
-        bool GetSniperInfoFromSkiplagged { get; }
-        bool UseSnipeLocationServer { get; }
-        bool UseTransferIvForSnipe { get; }
-        bool SnipeIgnoreUnknownIv { get; }
         int MinDelayBetweenSnipes { get; }
-        double SnipingScanOffset { get; }
         bool SnipePokemonNotInPokedex { get; }
         bool RandomizeRecycle { get; }
         int RandomRecycleValue { get; }
@@ -155,8 +149,8 @@ namespace PoGo.NecroBot.Logic.Interfaces.Configuration
         bool UseNearActionRandom { get; }
         ICollection<KeyValuePair<ItemId, int>> ItemRecycleFilter { get; }
 
-        ICollection<PokemonId> PokemonsToEvolve { get; }
         ICollection<PokemonId> PokemonsToLevelUp { get; }
+        CatchSettings PokemonToCatchLocally { get; }
 
         NotificationConfig NotificationConfig { get; }
         ICollection<PokemonId> PokemonsNotToTransfer { get; }
@@ -171,9 +165,6 @@ namespace PoGo.NecroBot.Logic.Interfaces.Configuration
         Dictionary<PokemonId, UpgradeFilter> PokemonUpgradeFilters { get; }
 
         Dictionary<PokemonId, BotSwitchPokemonFilter> BotSwitchPokemonFilters { get; }
-
-        SnipeSettings PokemonToSnipe { get; }
-
         bool StartupWelcomeDelay { get; }
         bool UseGoogleWalk { get; }
         double DefaultStepLength { get; }

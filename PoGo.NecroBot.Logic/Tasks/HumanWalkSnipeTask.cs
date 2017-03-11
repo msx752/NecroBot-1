@@ -54,7 +54,7 @@ namespace PoGo.NecroBot.Logic.Tasks
         private static ISession _session;
         private static ILogicSettings _setting;
         private static int pokestopCount = 0;
-        private static ConcurrentDictionary<PokemonId, PokemonId> pokemonToBeSnipedIds = new ConcurrentDictionary<PokemonId, PokemonId>();
+        private static ConcurrentDictionary<PokemonId, PokemonId> pokemonToBeCaughtLocallyIds = new ConcurrentDictionary<PokemonId, PokemonId>();
         static bool prioritySnipeFlag = false;
         private static DateTime lastUpdated = DateTime.Now.AddMinutes(-10);
 
@@ -118,21 +118,21 @@ namespace PoGo.NecroBot.Logic.Tasks
         {
             _session = session;
             _setting = _session.LogicSettings;
-            pokemonToBeSnipedIds = new ConcurrentDictionary<PokemonId, PokemonId>();
+            pokemonToBeCaughtLocallyIds = new ConcurrentDictionary<PokemonId, PokemonId>();
 
             if (_setting.HumanWalkingSnipeUseSnipePokemonList)
             {
-                foreach (var pokemonId in _setting.PokemonToSnipe.Pokemon)
+                foreach (var pokemonId in _setting.PokemonToCatchLocally.Pokemon)
                 {
-                    pokemonToBeSnipedIds[pokemonId] = pokemonId;
+                    pokemonToBeCaughtLocallyIds[pokemonId] = pokemonId;
                 }
             }
 
             foreach (var pokemonId in _setting.HumanWalkSnipeFilters
-                .Where(x => !pokemonToBeSnipedIds.ContainsKey(x.Key))
+                .Where(x => !pokemonToBeCaughtLocallyIds.ContainsKey(x.Key))
                 .Select(x => x.Key))
             {
-                pokemonToBeSnipedIds[pokemonId] = pokemonId;
+                pokemonToBeCaughtLocallyIds[pokemonId] = pokemonId;
             }
             //this will combine with pokemon snipe filter
         }
@@ -252,8 +252,19 @@ namespace PoGo.NecroBot.Logic.Tasks
                         pokemon.IsCatching = false;
                     }
 
-                    await TransferDuplicatePokemonTask.Execute(session, cancellationToken);
-                    await TransferWeakPokemonTask.Execute(session, cancellationToken);
+                    if (session.LogicSettings.TransferDuplicatePokemon)
+                        await TransferDuplicatePokemonTask.Execute(session, cancellationToken);
+
+                    if (session.LogicSettings.TransferWeakPokemon)
+                        await TransferWeakPokemonTask.Execute(session, cancellationToken);
+
+                    if (session.LogicSettings.EvolveAllPokemonAboveIv ||
+                        session.LogicSettings.EvolveAllPokemonWithEnoughCandy ||
+                        session.LogicSettings.UseLuckyEggsWhileEvolving ||
+                        session.LogicSettings.KeepPokemonsThatCanEvolve)
+                    {
+                        await EvolvePokemonTask.Execute(session, cancellationToken);
+                    }
                 }
             } while (pokemon != null && _setting.HumanWalkingSnipeTryCatchEmAll);
 
@@ -500,7 +511,7 @@ namespace PoGo.NecroBot.Logic.Tasks
                         continue;
                     }
                     //check if pokemon in the snip list
-                    if (!pokemonToBeSnipedIds.ContainsKey(item.PokemonId)) continue;
+                    if (!pokemonToBeCaughtLocallyIds.ContainsKey(item.PokemonId)) continue;
 
                     count++;
                     var snipeSetting = _setting.HumanWalkSnipeFilters.FirstOrDefault(x => x.Key == item.PokemonId);
@@ -661,7 +672,7 @@ namespace PoGo.NecroBot.Logic.Tasks
             };
 
             //in some case, we caught the pokemon before data refresh, we need add a fake pokemon to list to avoid it add back and waste time 
-            if (!exist && pokemonToBeSnipedIds.ContainsKey(id))
+            if (!exist && pokemonToBeCaughtLocallyIds.ContainsKey(id))
             {
                 var pokemonInfo = new SnipePokemonInfo()
                 {

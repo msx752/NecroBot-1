@@ -23,11 +23,48 @@ using PoGo.NecroBot.Logic.State;
 using PoGo.NecroBot.Logic.Tasks;
 using PoGo.NecroBot.Logic.Utils;
 using ProgressBar = PoGo.NecroBot.CLI.Resources.ProgressBar;
+using CommandLine;
+using CommandLine.Text;
+using PokemonGo.RocketAPI;
 
 #endregion using directives
 
 namespace PoGo.NecroBot.CLI
 {
+    class Options
+    {
+        [Option('i', "init", Required = false,
+          HelpText = "Init account")]
+        public bool Init { get; set; }
+
+        [Option('t', "template", DefaultValue = "", Required = false , HelpText = "Prints all messages to standard output.")]
+        public string Template { get; set; }
+
+        [Option('p', "password", DefaultValue = "", Required = false, HelpText = "pasword")]
+        public string Password { get; set; }
+
+        [Option('g', "google", DefaultValue = false, Required = false,HelpText = "is google account")]
+        public bool IsGoogle{ get; set; }
+
+        [Option('s', "start", DefaultValue = 1,HelpText = "Start account", Required = false)]
+        public int Start { get; set; }
+
+
+        [Option('e', "end", DefaultValue = 10, HelpText = "End account",Required = false)]
+        public int End { get; set; }
+
+        [ParserState]
+        public IParserState LastParserState { get; set; }
+
+        [HelpOption]
+        public string GetUsage()
+        {
+            return HelpText.AutoBuild(this,
+              (HelpText current) => HelpText.DefaultParsingErrorsHandler(this, current));
+        }
+    }
+
+
     public class Program
     {
         private static readonly ManualResetEvent QuitEvent = new ManualResetEvent(false);
@@ -53,7 +90,9 @@ namespace PoGo.NecroBot.CLI
         public static void RunBotWithParameters(Action<ISession, StatisticsAggregator> onBotStarted, string[] args)
         {
             var ioc = TinyIoC.TinyIoCContainer.Current;
-
+            //Setup Logger for API
+            APIConfiguration.Logger = new APILogListener();
+            
             Application.EnableVisualStyles();
             var strCulture = Thread.CurrentThread.CurrentCulture.TwoLetterISOLanguageName;
 
@@ -110,6 +149,7 @@ namespace PoGo.NecroBot.CLI
                 excelConfigAllow = true;
             }
 
+            //
             Logger.AddLogger(new ConsoleLogger(LogLevel.Service), _subPath);
             Logger.AddLogger(new FileLogger(LogLevel.Service), _subPath);
             Logger.AddLogger(new WebSocketLogger(LogLevel.Service), _subPath);
@@ -170,6 +210,15 @@ namespace PoGo.NecroBot.CLI
                 }
             }
 
+            var options = new Options();
+            if (CommandLine.Parser.Default.ParseArguments(args, options))
+            {
+                // Values are available here
+                if (options.Init)
+                {
+                    settings.GenerateAccount(options.IsGoogle, options.Template, options.Start, options.End, options.Password);
+                }
+            }
             var lastPosFile = Path.Combine(profileConfigPath, "LastPos.ini");
             if (File.Exists(lastPosFile) && settings.LocationConfig.StartFromLastPosition)
             {
@@ -195,10 +244,11 @@ namespace PoGo.NecroBot.CLI
 
             if (!_ignoreKillSwitch)
             {
-                if (CheckKillSwitch() || CheckMKillSwitch())
+                if (CheckMKillSwitch())
                 {
                     return;
                 }
+                CheckKillSwitch();
             }
 
             var logicSettings = new LogicSettings(settings);
@@ -268,7 +318,7 @@ namespace PoGo.NecroBot.CLI
                             "You select pogodev API but not provide API Key, please press any key to exit and correct you auth.json, \r\n The Pogodev API key call be purchased at - https://talk.pogodev.org/d/51-api-hashing-service-by-pokefarmer",
                             LogLevel.Error
                         );
-
+                        
                         Console.ReadKey();
                         Environment.Exit(0);
                     }
@@ -296,13 +346,16 @@ namespace PoGo.NecroBot.CLI
                 }
             }
 
-            _session = new Session(
+            _session = new Session(settings,
                 new ClientSettings(settings, elevationService), logicSettings, elevationService,
                 translation
             );
             ioc.Register<ISession>(_session);
 
             Logger.SetLoggerContext(_session);
+
+            MultiAccountManager accountManager = new MultiAccountManager(logicSettings.Bots);
+            ioc.Register<MultiAccountManager>(accountManager);
 
             if (boolNeedsSetup)
             {
@@ -387,12 +440,8 @@ namespace PoGo.NecroBot.CLI
             _session.Navigation.WalkStrategy.UpdatePositionEvent += LoadSaveState.SaveLocationToDisk;
 
             ProgressBar.Fill(100);
-
-            var accountManager = new MultiAccountManager(logicSettings.Bots);
-
+            
             var mainAccount = accountManager.Add(settings.Auth.AuthConfig);
-
-            ioc.Register<MultiAccountManager>(accountManager);
 
             var bot = accountManager.GetStartUpAccount();
 
@@ -411,10 +460,6 @@ namespace PoGo.NecroBot.CLI
             if (settings.TelegramConfig.UseTelegramAPI)
                 _session.Telegram = new TelegramService(settings.TelegramConfig.TelegramAPIKey, _session);
 
-            if (_session.LogicSettings.UseSnipeLocationServer ||
-                _session.LogicSettings.HumanWalkingSnipeUsePogoLocationFeeder)
-                SnipePokemonTask.AsyncStart(_session);
-
             if (_session.LogicSettings.EnableHumanWalkingSnipe &&
                 _session.LogicSettings.HumanWalkingSnipeUseFastPokemap)
             {
@@ -424,6 +469,11 @@ namespace PoGo.NecroBot.CLI
                     _session.CancellationTokenSource.Token); // that need to keep data live
                 #pragma warning restore 4014
             }
+
+            if (_session.LogicSettings.UseSnipeLocationServer ||
+              _session.LogicSettings.HumanWalkingSnipeUsePogoLocationFeeder)
+                SnipePokemonTask.AsyncStart(_session);
+
 
             if (_session.LogicSettings.DataSharingConfig.EnableSyncData)
             {
@@ -528,7 +578,7 @@ namespace PoGo.NecroBot.CLI
                         {
                             Logger.Write(strReason + $"\n", LogLevel.Warning);
 
-                            if (PromptForKillSwitchOverride())
+                            if (PromptForKillSwitchOverride(strReason))
                             {
                                 // Override
                                 Logger.Write("Overriding killswitch... you have been warned!", LogLevel.Warning);
@@ -537,6 +587,7 @@ namespace PoGo.NecroBot.CLI
 
                             Logger.Write("The bot will now close, please press enter to continue", LogLevel.Error);
                             Console.ReadLine();
+                            Environment.Exit(0);
                             return true;
                         }
                     }
@@ -558,28 +609,35 @@ namespace PoGo.NecroBot.CLI
             //throw new Exception();
         }
 
-        public static bool PromptForKillSwitchOverride()
+        public static bool PromptForKillSwitchOverride(string strReason)
         {
             Logger.Write("Do you want to override killswitch to bot at your own risk? Y/N", LogLevel.Warning);
 
-            while (true)
+            /*while (true)
+              {
+                  var strInput = Console.ReadLine().ToLower();
+
+                  switch (strInput)
+                  {
+                      case "y":
+                          // Override killswitch
+                          return true;
+
+                      case "n":
+                          return false;
+
+                      default:
+                          Logger.Write("Enter y or n", LogLevel.Error);
+                          continue;
+                  }
+              }*/
+            DialogResult result = MessageBox.Show($"{strReason} \n\r Do you want to override killswitch to bot at your own risk? Y/N", $"{Application.ProductName} - Old API detected", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            switch (result)
             {
-                var strInput = Console.ReadLine().ToLower();
-
-                switch (strInput)
-                {
-                    case "y":
-                        // Override killswitch
-                        return true;
-
-                    case "n":
-                        return false;
-
-                    default:
-                        Logger.Write("Enter y or n", LogLevel.Error);
-                        continue;
-                }
+                case DialogResult.Yes: return true;
+                case DialogResult.No: return false;
             }
+            return false;
         }
     }
 }

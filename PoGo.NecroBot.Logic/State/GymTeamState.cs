@@ -32,6 +32,12 @@ namespace PoGo.NecroBot.Logic.State
 
         public SwitchPokemonData swithAttacker { get; set; }
 
+        public int trainingRound { get; set; }
+
+        public string trainingGymId { get; set; }
+
+        public string capturedGymId { get; set; }
+
         public GymTeamState()
         {
             myTeam = new List<GymPokemon>();
@@ -246,7 +252,7 @@ namespace PoGo.NecroBot.Logic.State
 
         public int attackDuration
         {
-            get { return 2000; }
+            get { return 1000; }
         }
 
         public SwitchPokemonData(ulong Old, ulong New)
@@ -279,4 +285,5 @@ namespace PoGo.NecroBot.Logic.State
             }
         }
     }
+
 }
