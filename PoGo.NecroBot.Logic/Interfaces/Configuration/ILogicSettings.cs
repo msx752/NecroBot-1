@@ -79,7 +79,7 @@ namespace PoGo.NecroBot.Logic.Interfaces.Configuration
         float UpgradePokemonIvMinimum { get; }
         int DelayBetweenPlayerActions { get; }
         bool UsePokemonToNotCatchFilter { get; }
-        bool UsePokemonSniperFilterOnly { get; }
+        bool UsePokemonToCatchLocallyListOnly { get; }
         string SnipeLocationServer { get; }
         int SnipeLocationServerPort { get; }
         bool UseSnipeLocationServer { get; }
@@ -222,7 +222,6 @@ namespace PoGo.NecroBot.Logic.Interfaces.Configuration
         DataSharingConfig DataSharingConfig { get; }
         MultipleBotConfig MultipleBotConfig { get; }
         List<AuthConfig> Bots { get; }
-        bool AllowMultipleBot { get; }
         CaptchaConfig CaptchaConfig { get; }
         int BulkTransferStogareBuffer { get; }
         int BulkTransferSize { get; }
