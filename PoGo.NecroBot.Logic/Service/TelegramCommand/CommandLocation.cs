@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Device.Location;
+using GeoCoordinatePortable;
 using System.Threading.Tasks;
 using PoGo.NecroBot.Logic.Common;
 using PoGo.NecroBot.Logic.Event;
@@ -31,7 +31,7 @@ namespace PoGo.NecroBot.Logic.Service.TelegramCommand
             {
                 try
                 {
-                    await TelegramUtils.SendLocation(geo, telegramMessage.Chat.Id);
+                    await TelegramUtils.SendLocation(geo, telegramMessage.Chat.Id).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {

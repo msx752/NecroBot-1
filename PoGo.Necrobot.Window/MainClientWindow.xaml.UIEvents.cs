@@ -83,12 +83,15 @@ namespace PoGo.Necrobot.Window
 
             var maxPokemonStorage = currentSession.Profile?.PlayerData?.MaxPokemonStorage;
             var maxItemStorage = currentSession.Profile?.PlayerData?.MaxItemStorage;
-            var pokemons = currentSession.Inventory.GetPokemons();
+            var pokemons = currentSession.Inventory.GetPokemons().Result;
 
-            var inventory = currentSession.Inventory.GetCachedInventory();
+            var inventory = currentSession.Inventory.GetCachedInventory().Result;
             datacontext.SnipeList.OnInventoryRefreshed(inventory);
             datacontext.PlayerInfo.OnInventoryRefreshed(inventory);
             datacontext.EggsList.OnInventoryRefreshed(inventory);
+            
+            this.datacontext.MaxPokemonStorage = maxPokemonStorage.Value;
+            this.datacontext.RaisePropertyChanged("MaxPokemonStorage");
 
             var items = inventory.Select(x => x.InventoryItemData?.Item).Where(x => x != null).ToList();
             this.datacontext.MaxItemStorage = maxItemStorage.Value;
@@ -99,11 +102,6 @@ namespace PoGo.Necrobot.Window
 
             this.datacontext.PokemonList.Update(pokemons);
             this.datacontext.RaisePropertyChanged("PokemonTabHeader");
-
-            UIUpdateSafe(() =>
-             {
-                 tabPokemons.Header = $"   Pokemons ({this.datacontext.Pokemons.Count}/{maxPokemonStorage})   ";
-             });
         }
 
         public void OnBotEvent(InventoryItemUpdateEvent e)
