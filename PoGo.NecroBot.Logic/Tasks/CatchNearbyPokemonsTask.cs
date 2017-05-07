@@ -109,9 +109,8 @@ namespace PoGo.NecroBot.Logic.Tasks
                 }
                 cancellationToken.ThrowIfCancellationRequested();
                 TinyIoC.TinyIoCContainer.Current.Resolve<MultiAccountManager>().ThrowIfSwitchAccountRequested();
-                string pokemonUniqueKey = $"{pokemon.EncounterId}";
-
-                if (session.Cache.GetCacheItem(pokemonUniqueKey) != null)
+                
+                if (session.Cache.GetCacheItem(CatchPokemonTask.GetEncounterCacheKey(pokemon.EncounterId)) != null)
                 {
                     continue; //this pokemon has been skipped because not meet with catch criteria before.
                 }
@@ -122,9 +121,7 @@ namespace PoGo.NecroBot.Logic.Tasks
                 var ultraBallsCount = allitems.FirstOrDefault(i => i.ItemId == ItemId.ItemUltraBall)?.Count;
                 var masterBallsCount = allitems.FirstOrDefault(i => i.ItemId == ItemId.ItemMasterBall)?.Count;
                 masterBallsCount =
-                    masterBallsCount == null
-                        ? 0
-                        : masterBallsCount; //return null ATM. need this code to logic check work
+                    masterBallsCount ?? 0; //return null ATM. need this code to logic check work
 
                 if (pokeBallsCount + greatBallsCount + ultraBallsCount + masterBallsCount <
                     session.LogicSettings.PokeballsToKeepForSnipe && session.CatchBlockTime < DateTime.Now)

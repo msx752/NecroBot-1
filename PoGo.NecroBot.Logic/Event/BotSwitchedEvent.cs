@@ -1,12 +1,14 @@
-﻿namespace PoGo.NecroBot.Logic.Event
+﻿using PoGo.NecroBot.Logic.Model;
+
+namespace PoGo.NecroBot.Logic.Event
 {
     public class BotSwitchedEvent : IEvent
     {
-        private MultiAccountManager.BotAccount Account;
+        private Account Account;
 
-        public BotSwitchedEvent(MultiAccountManager.BotAccount nextBot)
+        public BotSwitchedEvent(Account nextBot)
         {
-            this.Account = nextBot;
+            Account = nextBot;
         }
     }
 }

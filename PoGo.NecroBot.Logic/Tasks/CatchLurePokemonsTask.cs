@@ -37,7 +37,7 @@ namespace PoGo.NecroBot.Logic.Tasks
                 session.Client.CurrentLatitude,
                 session.Client.CurrentLongitude) > 1000)
             {
-                Logger.Write($"ERROR - Bot stucked at snipe location({session.Client.CurrentLatitude},{session.Client.CurrentLongitude}). Teleport him back home - if you see this message please PM samuraitruong");
+                Logger.Write($"ERROR - Bot is stuck at snipe location({session.Client.CurrentLatitude},{session.Client.CurrentLongitude}). Teleport him back home - if you see this message please PM samuraitruong on Discord");
 
                 session.Client.Player.SetCoordinates(session.KnownLatitudeBeforeSnipe, session.KnownLongitudeBeforeSnipe, session.Client.CurrentAltitude);
                 return;
@@ -63,7 +63,7 @@ namespace PoGo.NecroBot.Logic.Tasks
             else
             {
                 var encounterId = currentFortData.LureInfo.EncounterId;
-                if (session.Cache.Get(currentFortData.LureInfo.EncounterId.ToString()) != null)
+                if (session.Cache.Get(CatchPokemonTask.GetEncounterCacheKey(currentFortData.LureInfo.EncounterId)) != null)
                     return; //pokemon been ignore before
 
                 var encounter = await session.Client.Encounter.EncounterLurePokemon(encounterId, fortId).ConfigureAwait(false);

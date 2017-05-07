@@ -25,6 +25,12 @@ namespace PoGo.NecroBot.Logic.Strategies.Walk
         //protected IWalkStrategy _fallbackStrategy;
 
         public event UpdatePositionDelegate UpdatePositionEvent;
+        public event GetRouteDelegate GetRouteEvent;
+
+        protected virtual void OnGetRouteEvent(List<GeoCoordinate> points)
+        {
+            GetRouteEvent?.Invoke(points);
+        }
 
         public abstract Task Walk(IGeoLocation targetLocation, Func<Task> functionExecutedWhileWalking, ISession session, CancellationToken cancellationToken, double walkSpeed = 0.0);
 
@@ -40,7 +46,7 @@ namespace PoGo.NecroBot.Logic.Strategies.Walk
             var distance = calculatedDistance;
             if (distance == 0)
             {
-                distance = this.CalculateDistance(session.Client.CurrentLatitude, session.Client.CurrentLongitude,
+                distance = CalculateDistance(session.Client.CurrentLatitude, session.Client.CurrentLongitude,
                     desination.Latitude, desination.Longitude);
             }
 
@@ -51,7 +57,7 @@ namespace PoGo.NecroBot.Logic.Strategies.Walk
                 {
                     Name = desination.Name,
                     Distance = distance,
-                    Route = this.RouteName,
+                    Route = RouteName,
                     Type = fortLocation.FortData.Type
                 });
             }
@@ -89,7 +95,7 @@ namespace PoGo.NecroBot.Logic.Strategies.Walk
             CancellationToken cancellationToken, double walkSpeed = 0.0)
         {
             // If we need to fall-back, then blacklist current strategy for 1 hour.
-            session.Navigation.BlacklistStrategy(this.GetType());
+            session.Navigation.BlacklistStrategy(GetType());
 
             IWalkStrategy nextStrategy = session.Navigation.GetStrategy(logicSettings);
 
@@ -123,13 +129,14 @@ namespace PoGo.NecroBot.Logic.Strategies.Walk
             {
                 points.Remove(tooNearPoint);
             }
-            if (points.Any()
-            ) //check if first waypoint is the current location (this is what google returns), in such case remove it!
+            if (points.Any()) //check if first waypoint is the current location (this is what google returns), in such case remove it!
             {
                 var firstStep = points.First();
                 if (firstStep == currentLocation)
                     points.Remove(points.First());
             }
+
+            OnGetRouteEvent(points);
 
             var walkedPointsList = new List<GeoCoordinate>();
             foreach (var nextStep in points)

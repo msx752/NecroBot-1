@@ -34,7 +34,7 @@ namespace PoGo.NecroBot.CLI.Forms
             if (forceInput)
             {
                 this.forceInput = forceInput;
-                this.ControlBox = false;
+                ControlBox = false;
                 btnCancel.Visible = false;
             }
         }
@@ -55,31 +55,27 @@ namespace PoGo.NecroBot.CLI.Forms
             }
         }
 
-        private void lnkBuy_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void LnkBuy_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             Process.Start("https://talk.pogodev.org/d/51-api-hashing-service-by-pokefarmer");
         }
 
-        private void btnOK_Click(object sender, EventArgs e)
+        private void BtnOK_Click(object sender, EventArgs e)
         {
             if (radHashServer.Checked && string.IsNullOrEmpty(txtAPIKey.Text))
             {
-                MessageBox.Show("Please enter API Key", "Missing API key", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Please enter a valid API Key", "Missing API Key", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
             if (!radHashServer.Checked && !radLegacy.Checked)
             {
-                MessageBox.Show("Please select an API method", "Config error",
+                MessageBox.Show("Please select an API method", "Config Error",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
-            this.DialogResult = DialogResult.OK;
-            this.Close();
-        }
-
-        private void AuthAPIForm_Load(object sender, EventArgs e)
-        {
+            DialogResult = DialogResult.OK;
+            Close();
         }
     }
 }

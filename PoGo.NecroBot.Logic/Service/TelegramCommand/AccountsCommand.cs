@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using PoGo.NecroBot.Logic.Common;
 using PoGo.NecroBot.Logic.State;
 using TinyIoC;
+using PoGo.NecroBot.Logic.Model;
 
 namespace PoGo.NecroBot.Logic.Service.TelegramCommand
 {
@@ -33,15 +34,18 @@ namespace PoGo.NecroBot.Logic.Service.TelegramCommand
             var manager = TinyIoCContainer.Current.Resolve<MultiAccountManager>();
             if (manager.AllowMultipleBot())
             {
-                foreach (var item in manager.Accounts)
+                using (var db = new AccountConfigContext())
                 {
-                    message = message +
-                              $"{item.Username}({item.AuthType})     {item.Level}     {item.GetRuntime()}\r\n";
+                    foreach (var item in db.Account)
+                    {
+                        message = message +
+                                  $"{item.Username}({item.AuthType})     {item.Level}     {item.GetRuntime()}\r\n";
+                    }
                 }
             }
             else
             {
-                message = message + "Multiple bot is disabled. please use /profile for current account details";
+                message = message + "Multiple bots are disabled. please use /profile for current account details";
             }
             callback(message);
             return true;

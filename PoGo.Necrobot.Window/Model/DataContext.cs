@@ -1,12 +1,7 @@
-using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using POGOProtos.Data;
 using System.Collections.ObjectModel;
-using PoGo.NecroBot.Logic.Common;
 
 namespace PoGo.Necrobot.Window.Model
 {
@@ -32,7 +27,7 @@ namespace PoGo.Necrobot.Window.Model
             }
             set
             {
-                this.internalPokemons = value;
+                internalPokemons = value;
                 RaisePropertyChanged("Pokemons");
                 RaisePropertyChanged("PokemonTabHeader");
             }
@@ -40,20 +35,22 @@ namespace PoGo.Necrobot.Window.Model
 
         public int MaxItemStorage { get; set; }
         public int MaxPokemonStorage { get; set; }
+        public int MaxEggStorage { get; set; }
         public DataContext()
         {
             UI = new UIViewModel();
             Map = new MapViewModel();
 
-            MaxItemStorage = 350;
-            MaxPokemonStorage = 250;
+            MaxItemStorage = 0;
+            MaxPokemonStorage = 0;
+            MaxEggStorage = 0;
             ItemsList = new ItemsListViewModel();
             Sidebar = new SidebarViewModel();
             internalPokemons = new List<PokemonData>();
             SnipeList = new SnipeListViewModel();
             EggsList = new EggsListViewModel();
 
-            PokemonList = new PokemonListViewModel(this.Session)
+            PokemonList = new PokemonListViewModel(Session)
             {
                 Pokemons = new ObservableCollection<PokemonDataViewModel>()
             };
@@ -68,26 +65,35 @@ namespace PoGo.Necrobot.Window.Model
                 {
                     pokemonNum = MaxPokemonStorage;
                 }
-                return $"   Pokemons ({pokemonNum}/{MaxPokemonStorage})   ";
+                return $"{pokemonNum}/{MaxPokemonStorage}";
+            }
+        }
+
+        public string EggsTabHeader
+        {
+            get
+            {
+                var numIncubatorsInUse = EggsList.Incubators.Count(i => i.InUse);
+
+                return $"{numIncubatorsInUse}/{EggsList.Eggs.Count()}";
             }
         }
 
         internal void Reset()
         {
-            this.PokemonList.Pokemons.Clear();
-            this.ItemsList.Items.Clear();
-            this.EggsList.Eggs.Clear();
-            this.EggsList.Incubators.Clear();
+            PokemonList.Pokemons.Clear();
+            ItemsList.Items.Clear();
+            EggsList.Eggs.Clear();
+            EggsList.Incubators.Clear();
 
-            this.ItemsList.RaisePropertyChanged("TotalItem");
+            ItemsList.RaisePropertyChanged("TotalItem");
         }
 
         public string ItemsTabHeader
         {
             get
             {
-                return $"   Items ({ ItemsList.Items.Sum(x=>x.ItemCount)}/{MaxItemStorage})   ";
-
+                return $"{ItemsList.Items.Sum(x=>x.ItemCount)}/{MaxItemStorage}";
             }
         }
 

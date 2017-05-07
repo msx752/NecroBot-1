@@ -1,7 +1,6 @@
 #region using directives
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -26,7 +25,6 @@ using ProgressBar = PoGo.NecroBot.CLI.Resources.ProgressBar;
 using CommandLine;
 using CommandLine.Text;
 using PokemonGo.RocketAPI;
-using System.Threading.Tasks;
 using System.Net.Http;
 
 #endregion using directives
@@ -109,7 +107,7 @@ namespace PoGo.NecroBot.CLI
 
             AppDomain.CurrentDomain.UnhandledException += UnhandledExceptionEventHandler;
 
-            Console.Title = @"NecroBot2";
+            Console.Title = @"NecroBot2 Loading";
             Console.CancelKeyPress += (sender, eArgs) =>
             {
                 QuitEvent.Set();
@@ -319,19 +317,42 @@ namespace PoGo.NecroBot.CLI
                     if (string.IsNullOrEmpty(apiCfg.AuthAPIKey))
                     {
                         Logger.Write(
-                            "You select pogodev API but not provide API Key, please press any key to exit and correct you auth.json, \r\n The Pogodev API key call be purchased at - https://talk.pogodev.org/d/51-api-hashing-service-by-pokefarmer",
+                            "You have selected PogoDev API but you have not provided an API Key, please press any key to exit and correct you auth.json, \r\n The Pogodev API key can be purchased at - https://talk.pogodev.org/d/51-api-hashing-service-by-pokefarmer",
                             LogLevel.Error
                         );
                         
                         Console.ReadKey();
                         Environment.Exit(0);
                     }
-                    //TODO - test api call to valida auth key
+                    try
+                    {
+                        HttpClient client = new HttpClient();
+                        client.DefaultRequestHeaders.Add("X-AuthToken", apiCfg.AuthAPIKey);
+                        var maskedKey = apiCfg.AuthAPIKey.Substring(0, 4) + "".PadLeft(apiCfg.AuthAPIKey.Length - 8, 'X') + apiCfg.AuthAPIKey.Substring(apiCfg.AuthAPIKey.Length - 4, 4);
+                        HttpResponseMessage response = client.PostAsync("https://pokehash.buddyauth.com/api/v131_0/hash", null).Result;
+
+                        string AuthKey = response.Headers.GetValues("X-AuthToken").FirstOrDefault();
+                        string MaxRequestCount = response.Headers.GetValues("X-MaxRequestCount").FirstOrDefault();
+                        DateTime AuthTokenExpiration = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(Convert.ToDouble(response.Headers.GetValues("X-AuthTokenExpiration").FirstOrDefault()));
+                        TimeSpan Expiration = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(Convert.ToDouble(response.Headers.GetValues("X-AuthTokenExpiration").FirstOrDefault())) - DateTime.UtcNow;
+                        string Result = $"Key: {maskedKey} RPM: {MaxRequestCount} Expiration Date: {AuthTokenExpiration.Month}/{AuthTokenExpiration.Day}/{AuthTokenExpiration.Year}";
+                        Logger.Write(Result, LogLevel.Info, ConsoleColor.Green);
+                        AuthKey = null;
+                        MaxRequestCount = null;
+                        Expiration = new TimeSpan();
+                        Result = null;
+                    }
+                    catch
+                    {
+                        Logger.Write("The HashKey is invalid or has expired, please press any key to exit and correct you auth.json, \r\n The Pogodev API key can be purchased at - https://talk.pogodev.org/d/51-api-hashing-service-by-pokefarmer", LogLevel.Error);
+                        Console.ReadKey();
+                        Environment.Exit(0);
+                    }
                 }
                 else if (apiCfg.UseLegacyAPI)
                 {
                     Logger.Write(
-                        "You bot will start after 15 second, You are running bot with  Legacy API (0.45) it will increase your risk to be banned and trigger captcha. Config captcha in config.json to auto resolve them",
+                        "You bot will start after 15 seconds, You are running bot with Legacy API (0.45), but it will increase your risk of being banned and triggering captchas. Config Captchas in config.json to auto-resolve them",
                         LogLevel.Warning
                     );
 
@@ -342,7 +363,7 @@ namespace PoGo.NecroBot.CLI
                 else
                 {
                     Logger.Write(
-                        "At least 1 authentication method is selected, please correct your auth.json, ",
+                        "At least 1 authentication method must be selected, please correct your auth.json.",
                         LogLevel.Error
                     );
                     Console.ReadKey();
@@ -358,9 +379,9 @@ namespace PoGo.NecroBot.CLI
 
             Logger.SetLoggerContext(_session);
 
-            MultiAccountManager accountManager = new MultiAccountManager(logicSettings.Bots);
-            ioc.Register<MultiAccountManager>(accountManager);
-
+            MultiAccountManager accountManager = new MultiAccountManager(settings, logicSettings.Bots);
+            ioc.Register(accountManager);
+            
             if (boolNeedsSetup)
             {
                 StarterConfigForm configForm = new StarterConfigForm(_session, settings, elevationService, configFile);
@@ -415,7 +436,7 @@ namespace PoGo.NecroBot.CLI
             ProgressBar.Fill(40);
 
             var aggregator = new StatisticsAggregator(stats);
-            if (onBotStarted != null) onBotStarted(_session, aggregator);
+            onBotStarted?.Invoke(_session, aggregator);
 
             ProgressBar.Fill(50);
             var listener = new ConsoleEventListener();
@@ -442,7 +463,7 @@ namespace PoGo.NecroBot.CLI
             //TODO: temporary
             if (settings.Auth.APIConfig.UseLegacyAPI)
             {
-                Logger.Write("The PoGoDev Community Has Updated The Hashing Service To Be Compatible With 0.57.4 So We Have Updated Our Code To Be Compliant. Unfortunately During This Update Niantic Has Also Attempted To Block The Legacy .45 Service Again So At The Moment Only Hashing Service Users Are Able To Login Successfully. Please Be Patient As Always We Will Attempt To Keep The Bot 100% Free But Please Realize We Have Already Done Quite A Few Workarounds To Keep .45 Alive For You Guys.  Even If We Are Able To Get Access Again To The .45 API Again It Is Over 3 Months Old So Is Going To Be More Detectable And Cause Captchas. Please Consider Upgrading To A Paid API Key To Avoid Captchas And You Will  Be Connecting Using Latest Version So Less Detectable So More Safe For You In The End.", LogLevel.Warning);
+                Logger.Write($"The PoGoDev Community Has Updated The Hashing Service To Be Compatible With {Client.API_VERSION} So We Have Updated Our Code To Be Compliant. Unfortunately During This Update Niantic Has Also Attempted To Block The Legacy .45 Service Again So At The Moment Only Hashing Service Users Are Able To Login Successfully. Please Be Patient As Always We Will Attempt To Keep The Bot 100% Free But Please Realize We Have Already Done Quite A Few Workarounds To Keep .45 Alive For You Guys.  Even If We Are Able To Get Access Again To The .45 API Again It Is Over 3 Months Old So Is Going To Be More Detectable And Cause Captchas. Please Consider Upgrading To A Paid API Key To Avoid Captchas And You Will  Be Connecting Using Latest Version So Less Detectable So More Safe For You In The End.", LogLevel.Warning);
                 Logger.Write("The bot will now close", LogLevel.Error);
                 Console.ReadLine();
                 Environment.Exit(0);
@@ -476,7 +497,7 @@ namespace PoGo.NecroBot.CLI
             if (_session.LogicSettings.EnableHumanWalkingSnipe &&
                 _session.LogicSettings.HumanWalkingSnipeUseFastPokemap)
             {
-              // jjskuld - Ignore CS4014 warning for now.
+                // jjskuld - Ignore CS4014 warning for now.
                 //#pragma warning disable 4014
                 HumanWalkSnipeTask.StartFastPokemapAsync(_session,
                     _session.CancellationTokenSource.Token).ConfigureAwait(false); // that need to keep data live
@@ -490,7 +511,7 @@ namespace PoGo.NecroBot.CLI
 
             if (_session.LogicSettings.DataSharingConfig.EnableSyncData)
             {
-                BotDataSocketClient.StartAsync(_session);
+                BotDataSocketClient.StartAsync(_session, Properties.Resources.EncryptKey);
                 _session.EventDispatcher.EventReceived += evt => BotDataSocketClient.Listen(evt, _session);
             }
             settings.CheckProxy(_session.Translation);
@@ -503,6 +524,13 @@ namespace PoGo.NecroBot.CLI
                 //MSniperServiceTask.ConnectToService();
                 //_session.EventDispatcher.EventReceived += evt => MSniperServiceTask.AddToList(evt);
             }
+
+            // jjskuld - Don't await the analytics service since it starts a worker thread that never returns.
+#pragma warning disable 4014
+            _session.AnalyticsService.StartAsync(_session, _session.CancellationTokenSource.Token);
+#pragma warning restore 4014
+            _session.EventDispatcher.EventReceived += evt => AnalyticsService.Listen(evt, _session);
+
             var trackFile = Path.GetTempPath() + "\\necrobot2.io";
 
             if (!File.Exists(trackFile) || File.GetLastWriteTime(trackFile) < DateTime.Now.AddDays(-1))
@@ -603,7 +631,7 @@ namespace PoGo.NecroBot.CLI
                             if (PromptForKillSwitchOverride(strReason))
                             {
                                 // Override
-                                Logger.Write("Overriding killswitch... you have been warned!", LogLevel.Warning);
+                                Logger.Write("Overriding Killswitch... you have been warned!", LogLevel.Warning);
                                 return false;
                             }
 

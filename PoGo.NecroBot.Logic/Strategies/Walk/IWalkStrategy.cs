@@ -3,7 +3,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using PoGo.NecroBot.Logic.Model;
 using PoGo.NecroBot.Logic.State;
-using POGOProtos.Networking.Responses;
 
 namespace PoGo.NecroBot.Logic.Strategies.Walk
 {
@@ -11,6 +10,7 @@ namespace PoGo.NecroBot.Logic.Strategies.Walk
     {
         string RouteName { get; }
         event UpdatePositionDelegate UpdatePositionEvent;
+        event GetRouteDelegate GetRouteEvent;
 
         Task Walk(IGeoLocation destinationLocation, Func<Task> functionExecutedWhileWalking,
             ISession session, CancellationToken cancellationToken, double customWalkingSpeed = 0.0);

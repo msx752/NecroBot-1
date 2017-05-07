@@ -4,10 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PoGo.NecroBot.Logic.Common
 {
@@ -20,12 +17,8 @@ namespace PoGo.NecroBot.Logic.Common
         [Description("CLICK HERE TO EXIT")]
         public string ClickHereExit { get; set; }
 
-
         [Description("Accounts")]
         public string AccountSetting { get; set; }
-        
-        [Description("Map & Journey")]
-        public string MapTabTitle { get; set; }
 
         [Description("SNIPE")]
         public string SnipeText { get; set; }
@@ -33,26 +26,17 @@ namespace PoGo.NecroBot.Logic.Common
         [Description("ALL BOT SNIPE")]
         public string SnipeAllBotText { get; set; }
 
-        [Description("Helps")]
+        [Description("Help")]
         public string Help { get; set; }
 
-        [Description("Sniper")]
-        public string SniperTabTitle { get; set; }
-        
-        [Description("Bot switching account... ")]
+        [Description("Bot Switching Account... ")]
         public string AccountSwitching { get; set; }
-
-        [Description("Eggs")]
-        public string EggTabHeader { get; set; }
-
-        [Description("Console")]
-        public string ConsoleTabTitle { get; set; }
-
-        [Description("Pokemon [{0}/{1}]")]
-        public string PokemonTabTitle { get; set; }
 
         [Description("Show Console")]
         public string ShowConsole { get; set; }
+
+        [Description("Reset Layout")]
+        public string ResetLayout { get; set; }
 
         [Description("Switch")]
         public string Switch { get; set; }
@@ -60,13 +44,22 @@ namespace PoGo.NecroBot.Logic.Common
         [Description("Hide Console")]
         public string HideConsole { get; set; }
 
-        [Description("Setting")]
+        [Description("Enable Hub")]
+        public string EnableHub { get; set; }
+
+        [Description("Disable Hub")]
+        public string DisableHub { get; set; }
+
+        [Description("Settings")]
         public string MenuSetting { get; set; }
 
         [Description("Theme")]
         public string Theme { get; set; }
-        
-        [Description("Enter your command")]
+
+        [Description("Scheme")]
+        public string Scheme { get; set; }
+
+        [Description("Enter your Command")]
         public string InputCommand { get; set; }
 
         #endregion
@@ -75,22 +68,22 @@ namespace PoGo.NecroBot.Logic.Common
         [Description("Zoom In")]
         public string ZoomIn { get; set; }
 
-        [Description("ZoomOut")]
+        [Description("Zoom Out")]
         public string ZoomOut { get; set; }
 
-        [Description("Clear map")]
+        [Description("Clear Map")]
         public string ClearMap { get; set; }
-        
+
         [Description("Walk Here")]
         public string WalkHere { get; set; }
-        
+
         #endregion
         #region snipe screen
-            
+
         [Description("100% IV")]
         public string TabSnipeIV100 { get; set; }
 
-        [Description("Rare pokemon")]
+        [Description("Rare Pokemon")]
         public string TabSnipeRarePokemon { get; set; }
 
         [Description("Others")]
@@ -104,10 +97,10 @@ namespace PoGo.NecroBot.Logic.Common
 
         [Description("Add Manual Coordinate")]
         public string TabSnipeAddManualCoord { get; set; }
-        
+
         [Description("Snipe??")]
         public string SnipeButton { get; set; }
-        
+
         [Description("FreeInput")]
         public string FreeInput { get; set; }
 
@@ -125,7 +118,7 @@ namespace PoGo.NecroBot.Logic.Common
         [Description("Types")]
         public string Types { get; set; }
 
-        [Description ("TRANSFER")]
+        [Description("TRANSFER")]
         public string TransferConfirmButton { get; set; }
 
         [Description("Do you want to transfer {0} IV:{1:0.00}% Level:{2}")]
@@ -133,6 +126,12 @@ namespace PoGo.NecroBot.Logic.Common
 
         [Description("Shiny")]
         public string Shiny { get; set; }
+
+        [Description("Form")]
+        public string Form { get; set; }
+
+        [Description("Costume")]
+        public string Costume { get; set; }
 
         [Description("Sex")]
         public string Sex { get; set; }
@@ -149,24 +148,24 @@ namespace PoGo.NecroBot.Logic.Common
         [Description("Snipe Upgrade Setting")]
         public string MenuUpgradeFilterText { get; set; }
 
-
         [Description("This pokemon can be evolve to below pokemon , please select the branch you want to evolve to")]
         public string EvolveConfirm { get; set; }
 
         [Description("Evolve Pokemon")]
         public string EvolvePopupCaption { get; set; }
+
         [Description("Search & Filters")]
         public string FilterAndSearch { get; set; }
 
         [Description("Pokedex")]
         public string Pokedex { get; set; }
-        
+
         [Description("Enter Pokemon Name")]
         public string SearchPokemonName { get; set; }
-        
+
         [Description("Select Pokemon %IV")]
         public string SearchPokemonIV { get; set; }
-        
+
         [Description("Select Pokemon Level")]
         public string SearchPokemonLevel { get; set; }
 
@@ -181,7 +180,7 @@ namespace PoGo.NecroBot.Logic.Common
 
         [Description("Do you want to powerup this pokemon? Normal power up is do x time power up. Max power up is powerup to maximun level up to your candy, stardust and player level.")]
         public string PowerUpDescription { get; set; }
-        
+
         [Description("Normal Power Up")]
         public string NormalPowerup { get; set; }
 
@@ -221,60 +220,63 @@ namespace PoGo.NecroBot.Logic.Common
         [Description("Level")]
         public string Level { get; set; }
 
+        [Description("Experience")]
+        public string ExperienceInfo { get; set; }
+
         [Description("Caught at")]
         public string CaughtTime { get; set; }
 
         [Description("Location")]
         public string CaughtLocation { get; set; }
-        
+
         [Description("Set Buddy")]
         public string SetBuddy { get; set; }
-        
+
         [Description("Actions")]
         public string Actions { get; set; }
 
         #endregion
         #region Popup
-            
+
         [Description("Latitude")]
         public string Latitude { get; set; }
 
         [Description("Longitude")]
         public string Longitude { get; set; }
 
-
         [Description("Distance")]
         public string Distance { get; set; }
-
 
         [Description("Close")]
         public string Close { get; set; }
 
-
-        [Description("WalkHere")]
+        [Description("Walk Here")]
         public string WalkToHere { get; set; }
 
         [Description("CP")]
         public string GymDefenderCP { get; set; }
 
-        [Description("Gym Point")]
+        [Description("Gym Points")]
         public string GymPoints { get; set; }
 
         [Description("Pokestops: {0}")]
         public string PokestopLimit { get; set; }
-        
+
         [Description("Pokemons: {0}")]
         public string CatchLimit { get; set; }
-        
+
         [Description("Speed: {0:0.00} km/h")]
         public string WalkSpeed { get; set; }
-        
+
         [Description("Transfered: {0}")]
         public string PokemonTransfered { get; set; }
+
         [Description("HIDE")]
         public string Hide { get; set; }
+
         [Description("SHOW")]
         public string Show { get; set; }
+
         [Description("Transfer filter - {0}")]
         public string TransferFilterFormTitle { get; set; }
         #endregion
@@ -286,7 +288,7 @@ namespace PoGo.NecroBot.Logic.Common
         {
             languageCode = language;
 
-            this.translationFile = string.Format(translationFile, language);
+            translationFile = string.Format(translationFile, language);
 
             Load();
         }
@@ -298,7 +300,7 @@ namespace PoGo.NecroBot.Logic.Common
             {
                 return prop.GetValue(this).ToString();
             }
-            if(translations.ContainsKey(key))
+            if (translations.ContainsKey(key))
             {
                 return translations[key];
             }
@@ -307,20 +309,20 @@ namespace PoGo.NecroBot.Logic.Common
 
         public void Save()
         {
-            var type = this.GetType();
+            var type = GetType();
             foreach (var item in type.GetProperties())
             {
                 if (translations.ContainsKey(item.Name)) continue;
                 translations.Add(item.Name, item.GetValue(this).ToString());
             }
 
-            File.WriteAllText(this.translationFile, JsonConvert.SerializeObject(translations, Formatting.Indented));
+            File.WriteAllText(translationFile, JsonConvert.SerializeObject(translations, Formatting.Indented));
         }
         public void Load()
         {
-            var type = this.GetType();
+            var type = GetType();
 
-            var props = this.GetType().GetProperties();
+            var props = GetType().GetProperties();
 
             foreach (var pi in props)
             {
