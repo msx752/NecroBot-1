@@ -1835,7 +1835,7 @@
       "Value": "洛奇亞"
     },
     {
-      "Key": "Ho-Oh",
+      "Key": "HoOh",
       "Value": "鳳王"
     },
     {
@@ -2607,6 +2607,10 @@
     {
       "Key": "HeavySlam",
       "Value": "重磅衝撞"
+    },
+    {
+      "Key": "Avalanche",
+      "Value": "雪崩"
     },
     {
       "Key": "rockSmashFast",

@@ -14,7 +14,7 @@
     <Setting Name="MapMode" Type="System.String" Scope="User">
       <Value Profile="(Default)">Normal</Value>
     </Setting>
-	<Setting Name="MapZoom" Type="System.Double" Scope="User">
+    <Setting Name="MapZoom" Type="System.Double" Scope="User">
       <Value Profile="(Default)">16</Value>
     </Setting>
     <Setting Name="Width" Type="System.Double" Scope="User">
@@ -29,11 +29,11 @@
     <Setting Name="BrowserToggled" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
-    <Setting Name="ConsoleToggled" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
-    </Setting>
     <Setting Name="ConsoleText" Type="System.String" Scope="User">
       <Value Profile="(Default)">StateHere Console</Value>
+    </Setting>
+    <Setting Name="ConsoleTheme" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Default</Value>
     </Setting>
   </Settings>
 </SettingsFile>
