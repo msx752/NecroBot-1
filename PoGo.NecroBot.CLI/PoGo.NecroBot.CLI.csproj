@@ -87,9 +87,10 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <PlatformTarget>x64</PlatformTarget>
     <OutputPath>bin\x64\Debug\</OutputPath>
-    <Optimize>true</Optimize>
+    <Optimize>false</Optimize>
     <DebugType>full</DebugType>
     <DebugSymbols>true</DebugSymbols>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
     <PlatformTarget>x64</PlatformTarget>
@@ -97,39 +98,7 @@
     <Optimize>true</Optimize>
     <DebugType>None</DebugType>
     <DebugSymbols>false</DebugSymbols>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release WPF GUI|AnyCPU'">
-    <OutputPath>bin\Release WPF GUI\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>None</DebugType>
-    <DebugSymbols>false</DebugSymbols>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <UseVSHostingProcess>false</UseVSHostingProcess>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release WPF GUI|x86'">
-    <OutputPath>bin\x86\Release WPF GUI\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>None</DebugType>
-    <DebugSymbols>false</DebugSymbols>
-    <PlatformTarget>x86</PlatformTarget>
-    <UseVSHostingProcess>false</UseVSHostingProcess>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>true</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release WPF GUI|x64'">
-    <OutputPath>bin\x64\Release WPF GUI\</OutputPath>
-    <Optimize>true</Optimize>
-    <DebugType>None</DebugType>
-    <DebugSymbols>false</DebugSymbols>
-    <PlatformTarget>x64</PlatformTarget>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Include="costura32\sqlite3.dll" />
@@ -511,7 +480,8 @@ rmdir /s /q x64</PostBuildEvent>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('$(SolutionDir)\packages\Selenium.WebDriver.ChromeDriver.2.29.0\build\Selenium.WebDriver.ChromeDriver.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\packages\Selenium.WebDriver.ChromeDriver.2.29.0\build\Selenium.WebDriver.ChromeDriver.targets'))" />
-    <Error Condition="!Exists('$(SolutionDir)\packages\Fody.2.0.8\build\netstandard1.4\Fody.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\packages\Fody.2.0.8\build\netstandard1.4\Fody.targets'))" />
+    <Error Condition="!Exists('$(SolutionDir)\packages\Fody.2.0.9\build\netstandard1.4\Fody.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\packages\Fody.2.0.9\build\netstandard1.4\Fody.targets'))" />
+    <Error Condition="!Exists('$(SolutionDir)\packages\Costura.Fody.1.5.0\build\dotnet\Costura.Fody.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\packages\Costura.Fody.1.5.0\build\dotnet\Costura.Fody.targets'))" />
   </Target>
   <UsingTask TaskName="CosturaCleanup" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll" TaskFactory="CodeTaskFactory">
     <ParameterGroup>
@@ -550,7 +520,8 @@ foreach (var item in filesToCleanup)
     <CosturaCleanup Config="FodyWeavers.xml" Files="@(ReferenceCopyLocalPaths->'$(OutDir)%(DestinationSubDirectory)%(Filename)%(Extension)')" />
   </Target>
   <Import Project="$(SolutionDir)\packages\Selenium.WebDriver.ChromeDriver.2.29.0\build\Selenium.WebDriver.ChromeDriver.targets" Condition="Exists('$(SolutionDir)\packages\Selenium.WebDriver.ChromeDriver.2.29.0\build\Selenium.WebDriver.ChromeDriver.targets')" />
-  <Import Project="$(SolutionDir)\packages\Fody.2.0.8\build\netstandard1.4\Fody.targets" Condition="Exists('$(SolutionDir)\packages\Fody.2.0.8\build\netstandard1.4\Fody.targets')" />
+  <Import Project="$(SolutionDir)\packages\Fody.2.0.9\build\netstandard1.4\Fody.targets" Condition="Exists('$(SolutionDir)\packages\Fody.2.0.9\build\netstandard1.4\Fody.targets')" />
+  <Import Project="$(SolutionDir)\packages\Costura.Fody.1.5.0\build\dotnet\Costura.Fody.targets" Condition="Exists('$(SolutionDir)\packages\Costura.Fody.1.5.0\build\dotnet\Costura.Fody.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

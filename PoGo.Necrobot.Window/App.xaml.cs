@@ -20,7 +20,6 @@ namespace PoGo.Necrobot.Window
     /// </summary>
     public partial class App : Application
     {
-        
         public App()
         {
             ShutdownMode = ShutdownMode.OnLastWindowClose;
@@ -78,6 +77,8 @@ namespace PoGo.Necrobot.Window
 
             MainWindow = new MainClientWindow();
 
+
+            ConsoleHelper.AllocConsole();
             UILogger logger = new UILogger()
             {
                 LogToUI = ((MainClientWindow)MainWindow).LogToConsoleTab
@@ -86,11 +87,14 @@ namespace PoGo.Necrobot.Window
 
             Task.Run(() =>
             {
-                NecroBot.CLI.Program.RunBotWithParameters(OnBotStartedEventHandler, false, new string[] { });
+                NecroBot.CLI.Program.RunBotWithParameters(OnBotStartedEventHandler, new string[] { });
             });
 
-            Settings.Default.Save();
-
+            if (Settings.Default.ConsoleToggled == true)
+                ConsoleHelper.ShowConsoleWindow();
+            if (Settings.Default.ConsoleToggled == false)
+                ConsoleHelper.HideConsoleWindow();
+            
             MainWindow.Show();
         }
         public void OnBotStartedEventHandler(ISession session, StatisticsAggregator stat)

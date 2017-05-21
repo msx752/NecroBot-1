@@ -62,9 +62,9 @@ namespace RocketBot2.Forms
         private bool _botStarted = false;
 
         private static readonly Uri StrKillSwitchUri =
-            new Uri("https://raw.githubusercontent.com/TheUnnamedOrganisation/RocketBot/master/KillSwitch.txt");
+            new Uri("https://cdn.rawgit.com/TheUnnamedOrganisation/RocketBot/master/KillSwitch.txt");
         private static readonly Uri StrMasterKillSwitchUri =
-            new Uri("https://raw.githubusercontent.com/TheUnnamedOrganisation/PoGo.NecroBot.Logic/master/MKS.txt");
+            new Uri("https://cdn.rawgit.com/TheUnnamedOrganisation/PoGo.NecroBot.Logic/master/MKS.txt");
 
         private GlobalSettings _settings;
         private StateMachine _machine;
@@ -114,7 +114,7 @@ namespace RocketBot2.Forms
 
         #region INTERFACE
 
-        private DateTime LastClearLog = DateTime.Now;
+        private static DateTime LastClearLog = DateTime.Now;
 
         public static void ColoredConsoleWrite(Color color, string text)
         {
@@ -127,12 +127,10 @@ namespace RocketBot2.Forms
                 return;
             }
 
-            #pragma warning disable CS1690
-            if (Instance.LastClearLog.AddMinutes(20) < DateTime.Now)
-            #pragma warning restore CS1690
+            if (LastClearLog.AddMinutes(20) < DateTime.Now)
             {
                 Instance.logTextBox.Text = string.Empty;
-                Instance.LastClearLog = DateTime.Now;
+                LastClearLog = DateTime.Now;
             }
 
             if (text.Contains("Error with API request type: DownloadRemoteConfigVersion"))
@@ -427,23 +425,37 @@ namespace RocketBot2.Forms
             //TODO: Kills the application
             try
             {
-                _playerOverlay.Dispose();
-                GC.SuppressFinalize(_playerOverlay);
-                _playerRouteOverlay.Dispose();
-                GC.SuppressFinalize(_playerRouteOverlay);
-                _pokemonsOverlay.Dispose();
-                GC.SuppressFinalize(_pokemonsOverlay);
-                _pokestopsOverlay.Dispose();
-                GC.SuppressFinalize(_pokestopsOverlay);
-                _searchAreaOverlay.Dispose();
-                GC.SuppressFinalize(_searchAreaOverlay);
-                GMapControl1.Dispose();
-                GC.SuppressFinalize(GMapControl1);
+                List<Control> listControls = new List<Control>();
+                foreach (Control control in Instance.Controls)
+                {
+                    listControls.Add(control);
+                }
+                foreach (Control control in listControls)
+                {
+                    Instance.Controls.Remove(control);
+                    control.Dispose();
+                    GC.SuppressFinalize(control);
+                }
+                // kills
+                Thread.CurrentThread.Abort(this);
             }
             catch
             {
-                Thread.CurrentThread.Abort(this);
+                Thread.ResetAbort();
             }
+
+            try
+            {
+                foreach (var process in Process.GetProcessesByName(Assembly.GetExecutingAssembly().GetName().Name))
+                {
+                    process.Kill();
+                }
+            }
+            catch
+            {
+                //not implanted
+            }
+            //*/
         }
 
         private void PokeEaseToolStripMenuItem_Click(object sender, EventArgs e)
@@ -956,6 +968,17 @@ namespace RocketBot2.Forms
 
             foreach (var item in items)
             {
+                if (item.ItemId == ItemId.ItemIncubatorBasicUnlimited)
+                {
+                    ItemData extra = new ItemData()
+                    {
+                        ItemId = ItemId.ItemSpecialCamera
+                    };
+                    var extra_box = new ItemBox(extra);
+                    extra_box.ItemClick += Instance.ItemBox_ItemClick;
+                    Instance.flpItems.Controls.Add(extra_box);
+                }
+
                 var box = new ItemBox(item);
                 if (appliedItems.ContainsKey(item.ItemId))
                 {
@@ -1256,7 +1279,7 @@ namespace RocketBot2.Forms
                         HttpClient client = new HttpClient();
                         client.DefaultRequestHeaders.Add("X-AuthToken", apiCfg.AuthAPIKey);
                         var maskedKey = apiCfg.AuthAPIKey.Substring(0, 4) + "".PadLeft(apiCfg.AuthAPIKey.Length - 8, 'X') + apiCfg.AuthAPIKey.Substring(apiCfg.AuthAPIKey.Length - 4, 4);
-                        HttpResponseMessage response = client.PostAsync("https://pokehash.buddyauth.com/api/v131_0/hash", null).Result;
+                        HttpResponseMessage response = client.PostAsync("https://pokehash.buddyauth.com/api/v133_1/hash", null).Result;
                         string AuthKey = response.Headers.GetValues("X-AuthToken").FirstOrDefault();
                         string MaxRequestCount = response.Headers.GetValues("X-MaxRequestCount").FirstOrDefault();
                         DateTime AuthTokenExpiration = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(Convert.ToDouble(response.Headers.GetValues("X-AuthTokenExpiration").FirstOrDefault()));
