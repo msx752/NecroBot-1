@@ -33,8 +33,7 @@ namespace PoGo.NecroBot.CLI
 {
     class Options
     {
-        [Option('i', "init", Required = false,
-          HelpText = "Init account")]
+        [Option('i', "init", Required = false, HelpText = "Init account")]
         public bool Init { get; set; }
 
         [Option('t', "template", DefaultValue = "", Required = false , HelpText = "Prints all messages to standard output.")]
@@ -48,7 +47,6 @@ namespace PoGo.NecroBot.CLI
 
         [Option('s', "start", DefaultValue = 1,HelpText = "Start account", Required = false)]
         public int Start { get; set; }
-
 
         [Option('e', "end", DefaultValue = 10, HelpText = "End account",Required = false)]
         public int End { get; set; }
@@ -334,8 +332,8 @@ namespace PoGo.NecroBot.CLI
                         string AuthKey = response.Headers.GetValues("X-AuthToken").FirstOrDefault();
                         string MaxRequestCount = response.Headers.GetValues("X-MaxRequestCount").FirstOrDefault();
                         DateTime AuthTokenExpiration = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(Convert.ToDouble(response.Headers.GetValues("X-AuthTokenExpiration").FirstOrDefault()));
-                        TimeSpan Expiration = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(Convert.ToDouble(response.Headers.GetValues("X-AuthTokenExpiration").FirstOrDefault())) - DateTime.UtcNow;
-                        string Result = $"Key: {maskedKey} RPM: {MaxRequestCount} Expiration Date: {AuthTokenExpiration.Month}/{AuthTokenExpiration.Day}/{AuthTokenExpiration.Year}";
+                        TimeSpan Expiration = AuthTokenExpiration - DateTime.UtcNow;
+                        string Result = $"Key: {maskedKey} RPM: {MaxRequestCount} Expiration Date: {AuthTokenExpiration.Month}/{AuthTokenExpiration.Day}/{AuthTokenExpiration.Year} ({Expiration.Days} Days {Expiration.Hours} Hours {Expiration.Minutes} Minutes)";
                         Logger.Write(Result, LogLevel.Info, ConsoleColor.Green);
                         AuthKey = null;
                         MaxRequestCount = null;
