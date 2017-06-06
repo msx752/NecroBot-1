@@ -1,18 +1,65 @@
-﻿using POGOProtos.Enums;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using PoGo.NecroBot.Logic.Event;
+using System.Threading.Tasks;
+using TinyIoC;
 using POGOProtos.Networking.Responses;
 using POGOProtos.Inventory;
+using POGOProtos.Enums;
+using PoGo.NecroBot.Logic.Event;
 using PoGo.NecroBot.Logic.Utils;
+using PoGo.NecroBot.Logic.State;
+using POGOProtos.Inventory.Item;
+using System.Timers;
 
 namespace PoGo.Necrobot.Window.Model
 {
     public class PlayerInfoModel : ViewModelBase
     {
+        private static DateTime expires = new DateTime(0);
+        private string lucky_expires;
+        public string Lucky_expires
+        {
+            get { return lucky_expires; }
+            set
+            {
+                lucky_expires = value;
+            }
+        }
+        private string insence_expires;
+        public string Insence_expires
+        {
+            get { return insence_expires; }
+            set
+            {
+                insence_expires = value;
+            }
+        }
         public PokemonId BuddyPokemonId { get; set; }
         public string Name { get; set; }
+
+        public double KmRemaining; // Not Working Quite Right
+        public double KmToWalk
+        {
+            get { return KmRemaining; }
+            set
+            {
+                KmRemaining = value;
+                RaisePropertyChanged("KmToWalk");
+                RaisePropertyChanged("EggPerc");
+            }
+        }
+
+        public int EggPerc
+        {
+            get
+            {
+                if (KmToWalk > 0)
+                    return (int)Math.Floor(KmRemaining / KmToWalk * 100);
+                return 0;
+            }
+        }
+
         private double exp;
         public double Exp
         {
@@ -122,7 +169,19 @@ namespace PoGo.Necrobot.Window.Model
         public string PokestopLimit { get; set; }
         public string CatchLimit { get; set; }
         public double WalkSpeed { get; set; }
-        public int PokemonTransfered { get; set; }
+        public string CollectPokeCoin { get; set; }
+
+        //Still Needs Some Work(TheWizard1328)
+        public int pokemontransfered;
+        public int PokemonTransfered //{ get; set; }
+        {
+            get { return pokemontransfered; }
+            set
+            {
+                pokemontransfered = value;
+                RaisePropertyChanged("PokemonTransfered");
+            }
+        }
 
         internal void OnProfileUpdate(ProfileEvent profile)
         {
@@ -134,6 +193,7 @@ namespace PoGo.Necrobot.Window.Model
                 LevelExp = playerStats.NextLevelXp;
             }
 
+            GetPokeCoin();
             playerProfile = profile.Profile;
         }
 
@@ -144,7 +204,7 @@ namespace PoGo.Necrobot.Window.Model
             var buddyData = playerProfile.PlayerData.BuddyPokemon;
 
             if (buddyData == null) return;
-             
+
             var buddy = inventory
                 .Select(x => x.InventoryItemData?.PokemonData)
                 .Where(x => x != null && x.Id == playerProfile.PlayerData.BuddyPokemon.Id)
@@ -172,6 +232,29 @@ namespace PoGo.Necrobot.Window.Model
             Exp = stat.StatsExport.CurrentXp - stat.StatsExport.PreviousXp;
             LevelExp = stat.StatsExport.LevelupXp - stat.StatsExport.PreviousXp;
             PokemonTransfered = stat.TotalPokemonTransferred;
+            //Still needs some work(TheWizard1328)
+            //KmRemaining = incubator.TargetKmWalked - kmWalked;
+            //KmToWalk = incubator.TargetKmWalked - incubator.StartKmWalked;
+
+            //Code added by furtif
+            var inventory = Session.Inventory.GetCachedInventory().Result;
+            var eggsListViewModel = new EggsListViewModel();
+            eggsListViewModel.OnInventoryRefreshed(inventory);
+
+            foreach (var x in eggsListViewModel.Incubators)
+            {
+                if (x.IsUnlimited && x.InUse)
+                {
+                    KmRemaining = x.TotalKM - x.KM;
+                    KmToWalk = x.TotalKM;
+                }
+            }
+            //
+
+            RaisePropertyChanged("KmToWalk");
+            RaisePropertyChanged("KmRemaining");
+            RaisePropertyChanged("EggPerc");
+
             RaisePropertyChanged("TotalPokemonTransferred;");
             RaisePropertyChanged("Runtime");
             RaisePropertyChanged("EXPPerHour");
@@ -182,25 +265,82 @@ namespace PoGo.Necrobot.Window.Model
             RaisePropertyChanged("Exp");
             RaisePropertyChanged("LevelExp");
 
+            // get applied items
+            var appliedItems =
+                Session.Inventory.GetAppliedItems().Result
+                .SelectMany(aItems => aItems.Item)
+                .ToDictionary(item => item.ItemId, item => new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddMilliseconds(item.ExpireMs));
+
+            var items =
+                     Session.Inventory.GetItems().Result
+                    .Where(i => i != null)
+                    .OrderBy(i => i.ItemId);
+
+            bool isLucky = false;
+            Lucky_expires = $"00m 00s";
+            Insence_expires = $"00m 00s";
+
+            foreach (var item in items)
+            {
+                if (appliedItems.ContainsKey(item.ItemId))
+                {
+                    expires = appliedItems[item.ItemId];
+                    if (item.ItemId == ItemId.ItemLuckyEgg) isLucky = true;
+                }
+            }
+
+            var time = expires - DateTime.UtcNow;
+            if (expires.Ticks == 0 || time.TotalSeconds < 0)
+            {
+                // my value here  00m 00s
+            }
+            else
+            {
+                // my value here  00m 00s
+                if (isLucky)
+                    Lucky_expires = $"{time.Minutes}m {Math.Abs(time.Seconds)}s";
+                else
+                    Insence_expires = $"{time.Minutes}m {Math.Abs(time.Seconds)}s";
+            }
+
+            RaisePropertyChanged("Lucky_expires");
+            RaisePropertyChanged("Insence_expires");
         }
 
         internal void UpdatePokestopLimit(PokestopLimitUpdate ev)
         {
             PokestopLimit = $"{ev.Value}/{ev.Limit}";
             RaisePropertyChanged("PokestopLimit");
+            UpdateEggs(KmRemaining);
         }
 
         internal void UpdateCatchLimit(CatchLimitUpdate ev)
         {
             CatchLimit = $"{ev.Value}/{ev.Limit}";
             RaisePropertyChanged("CatchLimit");
+            UpdateEggs(KmRemaining);
         }
 
         public void UpdateSpeed(double speed)
         {
             WalkSpeed = speed;
             RaisePropertyChanged("WalkSpeed");
+            UpdateEggs(KmRemaining);
+        }
 
+        public void UpdateEggs(double kmremaining)
+        {
+            KmRemaining = kmremaining;
+            RaisePropertyChanged("KmRemaining");
+        }
+
+        public void GetPokeCoin()
+        {
+            Session = TinyIoCContainer.Current.Resolve<ISession>();
+            var deployed = Session.Inventory.GetDeployedPokemons().Result;
+            var count = (deployed.Count() * 10).ToString();
+            CollectPokeCoin = $"Collect PokeCoin ({count})";
+            RaisePropertyChanged("CollectPokeCoin");
         }
     }
 }
