@@ -112,23 +112,19 @@ namespace RocketBot2.Forms
             btnRefresh.Enabled = false;
             //ConsoleHelper.HideConsoleWindow();
         }
+
         private void MainForm_Resize(object sender, EventArgs e)
         {
-            this.TrayIcon.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Info; //Shows the info icon so the user doesn't thing there is an error.
-            this.TrayIcon.BalloonTipText = "RocketBot2 minimized doubleClick to restore";
-            this.TrayIcon.BalloonTipTitle = "RocketBot2 when Minimize";
-            this.TrayIcon.Text = "RocketBot2 minimized, doubleclick on this icon to restore";
-
+            TrayIcon.Visible = false;
             if (FormWindowState.Minimized == this.WindowState)
             {
+                TrayIcon.BalloonTipIcon = ToolTipIcon.Info; //Shows the info icon so the user doesn't thing there is an error.
+                TrayIcon.BalloonTipText = "RocketBot2 minimized doubleClick to restore";
+                TrayIcon.BalloonTipTitle = "RocketBot2 when Minimize";
+                TrayIcon.Text = "RocketBot2 minimized, doubleclick on this icon to restore";
                 TrayIcon.Visible = true;
                 TrayIcon.ShowBalloonTip(5000);
-                this.Hide();
-            }
-
-            else if (FormWindowState.Normal == this.WindowState)
-            {
-                TrayIcon.Visible = false;
+                Hide();
             }
         }
 
@@ -449,6 +445,7 @@ namespace RocketBot2.Forms
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
+            TrayIcon.Visible = false;
             //TODO: Kills the application
             try
             {
@@ -1226,7 +1223,7 @@ namespace RocketBot2.Forms
             {
                 if (CheckMKillSwitch())
                 {
-                    return;
+                    _botStarted = CheckMKillSwitch();
                 }
                 _botStarted = CheckKillSwitch();
             }
@@ -1298,10 +1295,8 @@ namespace RocketBot2.Forms
                             "You have selected PogoDev API but you have not provided an API Key, please press any key to exit and correct you auth.json, \r\n The Pogodev API key can be purchased at - https://talk.pogodev.org/d/51-api-hashing-service-by-pokefarmer",
                             LogLevel.Error
                         );
-
-                        Console.ReadKey();
-                        Environment.Exit(0);
-                    }
+                        _botStarted = true;
+                   }
                     try
                     {
                         HttpClient client = new HttpClient();
@@ -1318,8 +1313,7 @@ namespace RocketBot2.Forms
                     catch
                     {
                         Logger.Write("The HashKey is invalid or has expired, please press any key to exit and correct you auth.json, \r\nThe Pogodev API key can be purchased at - https://talk.pogodev.org/d/51-api-hashing-service-by-pokefarmer", LogLevel.Error);
-                        Console.ReadKey();
-                        Environment.Exit(0);
+                        _botStarted = true;
                     }
                 }
                 else if (apiCfg.UseLegacyAPI)
@@ -1339,8 +1333,7 @@ namespace RocketBot2.Forms
                          "At least 1 authentication method must be selected, please correct your auth.json.",
                          LogLevel.Error
                      );
-                    Console.ReadKey();
-                    Environment.Exit(0);
+                    _botStarted = true;
                 }
             }
 
@@ -1376,10 +1369,10 @@ namespace RocketBot2.Forms
                 {
                     GlobalSettings.Load(_subPath, _enableJsonValidation);
 
-                    Logger.Write("Press a Key to continue...",
-                        LogLevel.Warning);
-                    Console.ReadKey();
-                    return;
+                    //Logger.Write("Press a Key to continue...",
+                    //    LogLevel.Warning);
+                    //Console.ReadKey();
+                    //return;
                 }
 
                 if (excelConfigAllow)
@@ -1466,19 +1459,13 @@ namespace RocketBot2.Forms
 
             ioc.Register<MultiAccountManager>(accountManager);
 
-            var bot = accountManager.GetStartUpAccount();
-            var TotXP = 0;
-
-            for (int i = 0; i < bot.Level + 1; i++)
-            {
-                TotXP = TotXP + Statistics.GetXpDiff(i);
-            }
-
             if (accountManager.AccountsReadOnly.Count > 1)
             {
                 foreach (var _bot in accountManager.AccountsReadOnly)
                 {
                     var _TotXP = 0;
+                    var _user = !string.IsNullOrEmpty(_bot.Nickname) ? _bot.Nickname : _bot.Username;
+
                     for (int i = 0; i < _bot.Level + 1; i++)
                     {
                         _TotXP = _TotXP + Statistics.GetXpDiff(i);
@@ -1486,14 +1473,14 @@ namespace RocketBot2.Forms
 
                     var _item = new ToolStripMenuItem()
                     {
-                        Text = _bot.Username
+                        Text = _user
                     };
                     _item.Click += delegate
                     {
                         if (!Instance._botStarted)
                             _session.ReInitSessionWithNextBot(_bot);
                         accountManager.SwitchAccountTo(_bot);
-                        Logger.Write($"(Bot Stats) User: {_bot.Nickname} | XP: {_bot.CurrentXp - _TotXP} | SD: {_bot.Stardust}", LogLevel.Info, ConsoleColor.Magenta);
+                        Logger.Write($"User: {_user} | XP: {_bot.CurrentXp - _TotXP} | SD: {_bot.Stardust}", LogLevel.BotStats);
                     };
                     accountsToolStripMenuItem.DropDownItems.Add(_item);
                 }
@@ -1503,13 +1490,24 @@ namespace RocketBot2.Forms
                 menuStrip1.Items.Remove(accountsToolStripMenuItem);
             }
 
-            _session.ReInitSessionWithNextBot(bot);
 
+            var bot = accountManager.GetStartUpAccount();
+            var TotXP = 0;
+            var user = !string.IsNullOrEmpty(bot.Nickname) ? bot.Nickname : bot.Username;
+
+            for (int i = 0; i < bot.Level + 1; i++)
+            {
+                TotXP = TotXP + Statistics.GetXpDiff(i);
+            }
+
+            _session.ReInitSessionWithNextBot(bot);
             _machine = machine;
             _settings = settings;
             _excelConfigAllow = excelConfigAllow;
 
-            Logger.Write($"(Bot Stats) User: {bot.Nickname} | XP: {bot.CurrentXp - TotXP} | SD: {bot.Stardust}", LogLevel.Info, ConsoleColor.Magenta);
+            Logger.Write($"User: {user} | XP: {bot.CurrentXp - TotXP} | SD: {bot.Stardust}", LogLevel.BotStats);
+
+            if (_botStarted) startStopBotToolStripMenuItem.Text = @"■ Exit RocketBot2";
         }
 
         private Task StartBot()
@@ -1632,15 +1630,12 @@ namespace RocketBot2.Forms
                     }
                     else
                         return false;
-
-
                 }
                 catch (Exception ex)
                 {
                     Logger.Write(ex.Message, LogLevel.Error);
                 }
             }
-
             return false;
         }
 
@@ -1677,8 +1672,8 @@ namespace RocketBot2.Forms
                             }
 
                             Logger.Write("The bot will now close, please press enter to continue", LogLevel.Error);
-                            Console.ReadLine();
-                            Environment.Exit(0);
+                            //Console.ReadLine();
+                            //Environment.Exit(0);
                             return true;
                         }
                     }

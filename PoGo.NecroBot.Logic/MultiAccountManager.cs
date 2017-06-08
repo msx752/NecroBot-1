@@ -362,18 +362,32 @@ namespace PoGo.NecroBot.Logic
         
         public void DumpAccountList()
         {
+            var userL = 0;
+            var maxL = 0;
+
             foreach (var item in Accounts)
             {
-                var L = item.Nickname.Length;
+                var user = string.IsNullOrEmpty(item.Nickname) ? item.Username : item.Nickname;
+                userL = user.Length;
+                if (userL > maxL)
+                {
+                    maxL = userL;
+                }
+            }
+
+            foreach (var item in Accounts)
+            {
                 var SP = "";
-                for (int i = 0; i < 31 - L; i++)
+                var user = string.IsNullOrEmpty(item.Nickname) ? item.Username : item.Nickname;
+                for (int i = 0; i < maxL - user.Length + 1; i++)
                 {
                     SP += " ";
                 }
+
                 if (item.Level > 0)
-                    Logging.Logger.Write($"{item.Nickname}{SP}(Level: {item.Level:#0}) | Runtime: {item.RuntimeTotal:00:00:00}");
+                    Logging.Logger.Write($"{user}{SP}(Level: {item.Level:#0}) | Runtime: {item.RuntimeTotal:00:00:00}");
                 else
-                    Logging.Logger.Write($"{item.Nickname}{SP}(Level: ??) | Runtime: {item.RuntimeTotal:00:00:00}");
+                    Logging.Logger.Write($"{user}{SP}(Level: ??) | Runtime: {item.RuntimeTotal:00:00:00}");
             }
         }
 
@@ -396,7 +410,7 @@ namespace PoGo.NecroBot.Logic
         }
         
         internal void DirtyEventHandle(Statistics stat)
-    {
+        {
             var account = GetCurrentAccount();
             if (account == null)
                 return;
