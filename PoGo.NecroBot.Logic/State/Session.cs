@@ -108,7 +108,8 @@ namespace PoGo.NecroBot.Logic.State
                 {
                     AuthType = settings.AuthType,
                     Password = settings.Password,
-                    Username = settings.Username
+                    Username = settings.Username,
+                    AutoExitBotIfAccountFlagged = settings.AutoExitBotIfAccountFlagged
                 });
             }
             if (File.Exists("runtime.log"))
@@ -198,8 +199,33 @@ namespace PoGo.NecroBot.Logic.State
             Forts.Clear();
 
             var manager = TinyIoCContainer.Current.Resolve<MultiAccountManager>();
+            var session = TinyIoCContainer.Current.Resolve<ISession>();
 
             var nextBot = manager.GetSwitchableAccount(bot);
+
+            var Account = !string.IsNullOrEmpty(nextBot.Nickname) ? nextBot.Nickname : nextBot.Username;
+            var TotXP = 0;
+
+            for (int i = 0; i < nextBot.Level + 1; i++)
+            {
+                TotXP = TotXP + Statistics.GetXpDiff(i);
+            }
+
+            long? XP = nextBot.CurrentXp;
+            if (XP == null) { XP = 0; }
+            long? SD = nextBot.Stardust;
+            if (SD == null) { SD = 0; }
+            var NLevelXP = nextBot.NextLevelXp;
+            if (nextBot.NextLevelXp == null) { NLevelXP = 0; }
+
+            Logger.Write($"Account changed to {Account}", LogLevel.BotStats);
+
+            if (session.LogicSettings.NotificationConfig.EnablePushBulletNotification == true)
+                PushNotificationClient.SendNotification(session, $"Account changed to", $"{Account}\n" +
+                                                                 $"Lvl: {nextBot.Level}\n" +
+                                                                 $"XP : {XP:#,##0}({(double)XP / ((double)NLevelXP) * 100:#0.00}%)\n" +
+                                                                 $"SD : {SD:#,##0}\n", true).ConfigureAwait(false);
+
             if (nextBot != null)
                 manager.SwitchAccounts(nextBot);
 

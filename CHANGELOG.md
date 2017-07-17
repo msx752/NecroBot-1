@@ -1,5 +1,150 @@
 # Change Log
 
+## [v1.0.0.184](https://github.com/Necrobot-Private/NecroBot/tree/v1.0.0.184) (2017-07-08)
+[Full Changelog](https://github.com/Necrobot-Private/NecroBot/compare/v1.0.0.183...v1.0.0.184)
+
+**Closed issues:**
+
+- Paid for key but no key received  [\#1885](https://github.com/Necrobot-Private/NecroBot/issues/1885)
+- \[Solved\]Necrobot doesn't write logs [\#1884](https://github.com/Necrobot-Private/NecroBot/issues/1884)
+- Bot not transferring.  I have changed the config with no luck [\#1871](https://github.com/Necrobot-Private/NecroBot/issues/1871)
+
+**Merged pull requests:**
+
+- Varios Updates [\#1886](https://github.com/Necrobot-Private/NecroBot/pull/1886) ([Furtif](https://github.com/Furtif))
+- rebase resources \(rockebot\) [\#1883](https://github.com/Necrobot-Private/NecroBot/pull/1883) ([Furtif](https://github.com/Furtif))
+
+## [v1.0.0.183](https://github.com/Necrobot-Private/NecroBot/tree/v1.0.0.183) (2017-07-06)
+[Full Changelog](https://github.com/Necrobot-Private/NecroBot/compare/v1.0.0.182...v1.0.0.183)
+
+**Closed issues:**
+
+- IP Ban Request [\#1882](https://github.com/Necrobot-Private/NecroBot/issues/1882)
+- Problem using legacy api [\#1881](https://github.com/Necrobot-Private/NecroBot/issues/1881)
+- detected a Pokemon API change [\#1880](https://github.com/Necrobot-Private/NecroBot/issues/1880)
+- Error opening bot [\#1879](https://github.com/Necrobot-Private/NecroBot/issues/1879)
+- Snipe not working [\#1875](https://github.com/Necrobot-Private/NecroBot/issues/1875)
+- API-key problem? [\#1874](https://github.com/Necrobot-Private/NecroBot/issues/1874)
+- The HashKey is invalid or has expired [\#1873](https://github.com/Necrobot-Private/NecroBot/issues/1873)
+- Unexpected Response from Pokemon SSO 0auth login url: status code conflict [\#1870](https://github.com/Necrobot-Private/NecroBot/issues/1870)
+- error when start battle. [\#1869](https://github.com/Necrobot-Private/NecroBot/issues/1869)
+- I need help \(its not an issue\) [\#1868](https://github.com/Necrobot-Private/NecroBot/issues/1868)
+- How to not hatch the 10k eggs? i [\#1865](https://github.com/Necrobot-Private/NecroBot/issues/1865)
+- Pokestops ignored/not spun [\#1864](https://github.com/Necrobot-Private/NecroBot/issues/1864)
+- Run Times with Variations \*\*ENHANCEMENT [\#1863](https://github.com/Necrobot-Private/NecroBot/issues/1863)
+- Error with API request type: GetGymDetails [\#1861](https://github.com/Necrobot-Private/NecroBot/issues/1861)
+- Bot  not transfering pokemon \(immediately\)  [\#1860](https://github.com/Necrobot-Private/NecroBot/issues/1860)
+- Bot is moving around in same place [\#1859](https://github.com/Necrobot-Private/NecroBot/issues/1859)
+- Red slash on botted pokemon.... [\#1858](https://github.com/Necrobot-Private/NecroBot/issues/1858)
+
+**Merged pull requests:**
+
+- Raid build [\#1878](https://github.com/Necrobot-Private/NecroBot/pull/1878) ([Lord-Haji](https://github.com/Lord-Haji))
+- Varios updates - For PR \#1878 [\#1876](https://github.com/Necrobot-Private/NecroBot/pull/1876) ([Furtif](https://github.com/Furtif))
+- Various updates [\#1867](https://github.com/Necrobot-Private/NecroBot/pull/1867) ([Furtif](https://github.com/Furtif))
+
+## [v1.0.0.182](https://github.com/Necrobot-Private/NecroBot/tree/v1.0.0.182) (2017-06-28)
+[Full Changelog](https://github.com/Necrobot-Private/NecroBot/compare/v1.0.0.181...v1.0.0.182)
+
+**Closed issues:**
+
+- gym enable error [\#1856](https://github.com/Necrobot-Private/NecroBot/issues/1856)
+- System.Exception: Unexpected inventory error. Could not generate hash code. [\#1854](https://github.com/Necrobot-Private/NecroBot/issues/1854)
+- Necrobot has stopped working [\#1852](https://github.com/Necrobot-Private/NecroBot/issues/1852)
+
+**Merged pull requests:**
+
+- v2.11.0.7 RB [\#1857](https://github.com/Necrobot-Private/NecroBot/pull/1857) ([Furtif](https://github.com/Furtif))
+- Update ui.pl.json WIP [\#1828](https://github.com/Necrobot-Private/NecroBot/pull/1828) ([SLASHLogin](https://github.com/SLASHLogin))
+
+## [v1.0.0.181](https://github.com/Necrobot-Private/NecroBot/tree/v1.0.0.181) (2017-06-27)
+[Full Changelog](https://github.com/Necrobot-Private/NecroBot/compare/v1.0.0.180...v1.0.0.181)
+
+**Closed issues:**
+
+- Error api key but I have a valid api key [\#1850](https://github.com/Necrobot-Private/NecroBot/issues/1850)
+- \(ERROR\) Hash API server \(https://pokehash.buddyauth.com/api/v137\_1/hash\) might down! [\#1849](https://github.com/Necrobot-Private/NecroBot/issues/1849)
+- could not generate hash code  [\#1847](https://github.com/Necrobot-Private/NecroBot/issues/1847)
+- One or more errors occured!! [\#1844](https://github.com/Necrobot-Private/NecroBot/issues/1844)
+- Error for accounts that have participated in raids  [\#1843](https://github.com/Necrobot-Private/NecroBot/issues/1843)
+- Error after Update [\#1840](https://github.com/Necrobot-Private/NecroBot/issues/1840)
+- I couldn't use bot 3 days and my hashing service out of date [\#1839](https://github.com/Necrobot-Private/NecroBot/issues/1839)
+- Pokemon Go after Update 0.67.1 [\#1838](https://github.com/Necrobot-Private/NecroBot/issues/1838)
+- We have detected a new API change [\#1837](https://github.com/Necrobot-Private/NecroBot/issues/1837)
+
+**Merged pull requests:**
+
+- GetInbox Every Request [\#1855](https://github.com/Necrobot-Private/NecroBot/pull/1855) ([hardknoxni69a](https://github.com/hardknoxni69a))
+- Pushbullet update & Translation - Fix pointer submodule feroxrev [\#1851](https://github.com/Necrobot-Private/NecroBot/pull/1851) ([Furtif](https://github.com/Furtif))
+- add golden razz berrie and premierball ids [\#1846](https://github.com/Necrobot-Private/NecroBot/pull/1846) ([Furtif](https://github.com/Furtif))
+- Partial gyms fixes [\#1842](https://github.com/Necrobot-Private/NecroBot/pull/1842) ([Furtif](https://github.com/Furtif))
+
+## [v1.0.0.180](https://github.com/Necrobot-Private/NecroBot/tree/v1.0.0.180) (2017-06-23)
+[Full Changelog](https://github.com/Necrobot-Private/NecroBot/compare/v1.0.0.179...v1.0.0.180)
+
+**Closed issues:**
+
+- API Needed [\#1834](https://github.com/Necrobot-Private/NecroBot/issues/1834)
+- NecroBot2 dosen't work [\#1832](https://github.com/Necrobot-Private/NecroBot/issues/1832)
+- Exception caught, writing LogBuffer [\#1825](https://github.com/Necrobot-Private/NecroBot/issues/1825)
+- Nothing Works! [\#1824](https://github.com/Necrobot-Private/NecroBot/issues/1824)
+- System.Collections.Generic.KeyNotFoundException [\#1823](https://github.com/Necrobot-Private/NecroBot/issues/1823)
+- WinGUI Crashed with "Start From Scratch" Ver. 178 [\#1822](https://github.com/Necrobot-Private/NecroBot/issues/1822)
+- Update 1.0.0.178 makes NecroBot crash [\#1820](https://github.com/Necrobot-Private/NecroBot/issues/1820)
+
+**Merged pull requests:**
+
+- 0.67.1 support update [\#1833](https://github.com/Necrobot-Private/NecroBot/pull/1833) ([Furtif](https://github.com/Furtif))
+- Create ui.zh-TW.json [\#1830](https://github.com/Necrobot-Private/NecroBot/pull/1830) ([informer0827](https://github.com/informer0827))
+- Release v2.10.3.8 \(RocketBot2\)  [\#1829](https://github.com/Necrobot-Private/NecroBot/pull/1829) ([Furtif](https://github.com/Furtif))
+
+## [v1.0.0.179](https://github.com/Necrobot-Private/NecroBot/tree/v1.0.0.179) (2017-06-16)
+[Full Changelog](https://github.com/Necrobot-Private/NecroBot/compare/v1.0.0.178...v1.0.0.179)
+
+**Closed issues:**
+
+- New error after update [\#1821](https://github.com/Necrobot-Private/NecroBot/issues/1821)
+- help? [\#1818](https://github.com/Necrobot-Private/NecroBot/issues/1818)
+- 1.0.0.134 CLI is a Trojan.  [\#1817](https://github.com/Necrobot-Private/NecroBot/issues/1817)
+- login not possible [\#1816](https://github.com/Necrobot-Private/NecroBot/issues/1816)
+
+**Merged pull requests:**
+
+- Fixes bug v1.0.0.178 Exception caught, writing LogBuffer [\#1826](https://github.com/Necrobot-Private/NecroBot/pull/1826) ([Furtif](https://github.com/Furtif))
+- Reapply Level Up Reward Fix [\#1819](https://github.com/Necrobot-Private/NecroBot/pull/1819) ([hopebasket](https://github.com/hopebasket))
+
+## [v1.0.0.178](https://github.com/Necrobot-Private/NecroBot/tree/v1.0.0.178) (2017-06-14)
+[Full Changelog](https://github.com/Necrobot-Private/NecroBot/compare/v1.0.0.177...v1.0.0.178)
+
+**Closed issues:**
+
+- Shadow Ban [\#1813](https://github.com/Necrobot-Private/NecroBot/issues/1813)
+- RPM needed and tips [\#1810](https://github.com/Necrobot-Private/NecroBot/issues/1810)
+- Not Collecting Level Up Reward [\#1807](https://github.com/Necrobot-Private/NecroBot/issues/1807)
+- AutoSnipe IV Calculator Calculating Wrong IV [\#1806](https://github.com/Necrobot-Private/NecroBot/issues/1806)
+- How do you update the bot's location? [\#1801](https://github.com/Necrobot-Private/NecroBot/issues/1801)
+- Hashing Key buying Problem. [\#1800](https://github.com/Necrobot-Private/NecroBot/issues/1800)
+- discord server [\#1777](https://github.com/Necrobot-Private/NecroBot/issues/1777)
+
+**Merged pull requests:**
+
+- Update LoginUserAgent \(update submodule\) [\#1815](https://github.com/Necrobot-Private/NecroBot/pull/1815) ([Furtif](https://github.com/Furtif))
+- Release v2.10.3.7 \(RocketBot2\) [\#1814](https://github.com/Necrobot-Private/NecroBot/pull/1814) ([Furtif](https://github.com/Furtif))
+- Auto Exit Bot If Account is Flagged [\#1812](https://github.com/Necrobot-Private/NecroBot/pull/1812) ([Furtif](https://github.com/Furtif))
+- Update CONTRIBUTORS.md [\#1811](https://github.com/Necrobot-Private/NecroBot/pull/1811) ([Furtif](https://github.com/Furtif))
+- Release v2.10.3.5 \(RocketBot2\) [\#1809](https://github.com/Necrobot-Private/NecroBot/pull/1809) ([Furtif](https://github.com/Furtif))
+- Latest API Update [\#1808](https://github.com/Necrobot-Private/NecroBot/pull/1808) ([hardknoxni69a](https://github.com/hardknoxni69a))
+- Code Clean up [\#1804](https://github.com/Necrobot-Private/NecroBot/pull/1804) ([Furtif](https://github.com/Furtif))
+- fix transfert translation event [\#1803](https://github.com/Necrobot-Private/NecroBot/pull/1803) ([Furtif](https://github.com/Furtif))
+- Fixes freezes bot if hash key not valide or expired \(RocketBot2\) and more \(Global\) [\#1802](https://github.com/Necrobot-Private/NecroBot/pull/1802) ([Furtif](https://github.com/Furtif))
+- Add 2gen missing moves in to translation.cs and fix elevationservice [\#1799](https://github.com/Necrobot-Private/NecroBot/pull/1799) ([Furtif](https://github.com/Furtif))
+- Updates Dependencies \(Preparation for .Net 4.7 Official Support\) [\#1797](https://github.com/Necrobot-Private/NecroBot/pull/1797) ([CDAGaming](https://github.com/CDAGaming))
+- 	fix multiaccount methodes [\#1796](https://github.com/Necrobot-Private/NecroBot/pull/1796) ([Furtif](https://github.com/Furtif))
+- Release v2.10.3.1 \(RocketBot\) [\#1795](https://github.com/Necrobot-Private/NecroBot/pull/1795) ([Furtif](https://github.com/Furtif))
+- merge RocketBot into NecroBot [\#1794](https://github.com/Necrobot-Private/NecroBot/pull/1794) ([TheWizard1328](https://github.com/TheWizard1328))
+- Add rocketbot to tray if minimized [\#1793](https://github.com/Necrobot-Private/NecroBot/pull/1793) ([Furtif](https://github.com/Furtif))
+- Update Dependencies and Adjustments [\#1792](https://github.com/Necrobot-Private/NecroBot/pull/1792) ([CDAGaming](https://github.com/CDAGaming))
+
 ## [v1.0.0.177](https://github.com/Necrobot-Private/NecroBot/tree/v1.0.0.177) (2017-06-01)
 [Full Changelog](https://github.com/Necrobot-Private/NecroBot/compare/v1.0.0.176...v1.0.0.177)
 
@@ -3032,4 +3177,4 @@
 ## [v0.1-beta](https://github.com/Necrobot-Private/NecroBot/tree/v0.1-beta) (2016-07-25)
 
 
-\* *This Change Log was automatically generated by [github_changelog_generator](https://github.com/skywinder/Github-Changelog-Generator)*
+* *This Change Log was automatically generated by [github_changelog_generator](https://github.com/skywinder/Github-Changelog-Generator)*

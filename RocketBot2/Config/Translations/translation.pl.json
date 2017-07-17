@@ -118,7 +118,7 @@
     },
     {
       "Key": "eventPokemonTransferred",
-      "Value": "{0}\t- CP: {1}  IV: {2}%  [Najlepszy z CP: {3}  IV: {4}%] (Cukierki: {5})"
+      "Value": "{0} | CP: {1}/{3} | IV: {2}%/{4}% | Cukierki: {5} | Lvl: {6} | Slashed: {7}"
     },
     {
       "Key": "eventItemRecycled",
@@ -126,11 +126,11 @@
     },
     {
       "Key": "eventPokemonCaptureSuccess",
-      "Value": "({0}) | ({1}) {2}  [Lvl: {3} | CP: ({4}/{5}) | IV: {6}%] Szansa: {7}% | Odległy o: {8}m | Użyto: {9} (Pozostało {10}) | EXP: {11} | {12} | Szerokość: {13} Długość: {14} | Umiejętność 1.: {15} Umiejętność 2.: {16}"
+      "Value": "({0}) | ({1}) {2} |  [Lvl: {3} | CP: {4}/{5} | IV: {6}%] Szansa: {7}% | Odległy o: {8}m | Użyto: {9} (Pozostało {10}) | EXP: {11} | {12} | Szerokość: {13} Długość: {14} | Umiejętność 1.: {15} Umiejętność 2.: {16}"
     },
     {
       "Key": "eventPokemonCaptureFailed",
-      "Value": "({0}) | ({1}) {2}  [Lvl: {3} | CP: ({4}/{5}) | IV: {6}%] Szansa: {7}% | Odległy o: {8}m | Użyto: {9} (Pozostało {10}) | Szerokość: {11} Długość: {12} | Move1: {13} Move2: {14}"
+      "Value": "({0}) | ({1}) {2} |  [Lvl: {3} | CP: {4}/{5} | IV: {6}%] Szansa: {7}% | Odległy o: {8}m | Użyto: {9} (Pozostało {10}) | Szerokość: {11} Długość: {12} | Move1: {13} Move2: {14}"
     },
     {
       "Key": "eventNoPokeballs",

@@ -17,6 +17,7 @@ using PoGo.NecroBot.Logic.State;
 using PoGo.NecroBot.Logic.Tasks;
 using PoGo.NecroBot.Logic.Utils;
 using POGOProtos.Data;
+using POGOProtos.Data.Raid;
 using POGOProtos.Inventory.Item;
 using POGOProtos.Map.Fort;
 using POGOProtos.Map.Pokemon;
@@ -81,6 +82,8 @@ namespace RocketBot2.Forms
         internal readonly GMapOverlay _pokestopsOverlay = new GMapOverlay("pokestops");
         internal readonly GMapOverlay _searchAreaOverlay = new GMapOverlay("areas");
 
+        private const int DefaultZoomLevel = 15;
+
         public static Session _session;
 
         public MainForm(string[] _args)
@@ -119,19 +122,20 @@ namespace RocketBot2.Forms
             if (FormWindowState.Minimized == this.WindowState)
             {
                 TrayIcon.BalloonTipIcon = ToolTipIcon.Info; //Shows the info icon so the user doesn't thing there is an error.
-                TrayIcon.BalloonTipText = "RocketBot2 minimized doubleClick to restore";
-                TrayIcon.BalloonTipTitle = "RocketBot2 when Minimize";
-                TrayIcon.Text = "RocketBot2 minimized, doubleclick on this icon to restore";
+                TrayIcon.BalloonTipText = "RocketBot2 is minimized, click on this icon to restore";
+                TrayIcon.BalloonTipTitle = "RocketBot2 is minimized";
+                TrayIcon.Text = "RocketBot2 is minimized, click on this icon to restore";
                 TrayIcon.Visible = true;
                 TrayIcon.ShowBalloonTip(5000);
                 Hide();
             }
         }
 
-        private void TrayIcon_MouseDoubleClick(object sender, MouseEventArgs e)
+        private void TrayIcon_MouseClick(object sender, MouseEventArgs e)
         {
             this.Show();
-            this.WindowState = FormWindowState.Normal;
+            this.WindowState = FormWindowState.Maximized;
+            this.Refresh();
         }
         #endregion
 
@@ -232,7 +236,6 @@ namespace RocketBot2.Forms
 
             GMapControl1.MinZoom = 2;
             GMapControl1.MaxZoom = 18;
-            GMapControl1.Zoom = 15;
             
             GMapControl1.Overlays.Add(_searchAreaOverlay);
             GMapControl1.Overlays.Add(_pokestopsOverlay);
@@ -245,6 +248,8 @@ namespace RocketBot2.Forms
             _playerMarker.Position = new PointLatLng(lat, lng);
             _searchAreaOverlay.Polygons.Clear();
             S2GMapDrawer.DrawS2Cells(S2Helper.GetNearbyCellIds(lng, lat), _searchAreaOverlay);
+            trackBar.Value = DefaultZoomLevel;
+            GMapControl1.OnMapZoomChanged += delegate { trackBar.Value = (int)GMapControl1.Zoom; };
         }
 
         private void GMAPSatellite_CheckedChanged(object sender, EventArgs e)
@@ -286,6 +291,7 @@ namespace RocketBot2.Forms
                 foreach (var pokeStop in pokeStops)
                 {
                     var pokeStopLoc = new PointLatLng(pokeStop.Latitude, pokeStop.Longitude);
+
                     Image fort = null;
                     switch (pokeStop.Type)
                     {
@@ -293,19 +299,42 @@ namespace RocketBot2.Forms
                             fort = ResourceHelper.GetImage("Pokestop", null, null, 32, 32);
                             break;
                         case FortType.Gym:
-                            switch (pokeStop.OwnedByTeam)
+                            bool isRaid = false;
+                            try
                             {
+                                if (!string.IsNullOrEmpty(pokeStop.RaidInfo.RaidPokemon.PokemonId.ToString()))
+                                    isRaid = true;
+                            }
+                            catch
+                            {
+                                isRaid = false;
+                            }
+
+                            switch (pokeStop.OwnedByTeam)
+                            { 
                                 case POGOProtos.Enums.TeamColor.Neutral:
-                                    fort = ResourceHelper.GetImage("GymVide", null, null, 32, 32);
+                                    if (isRaid)
+                                        fort = ResourceHelper.GetImage("GymVideRaid", null, null, 32, 32);
+                                    else
+                                        fort = ResourceHelper.GetImage("GymVide", null, null, 32, 32);
                                     break;
                                 case POGOProtos.Enums.TeamColor.Blue:
-                                    fort = ResourceHelper.GetImage("GymBlue", null, null, 32, 32);
+                                    if (isRaid)
+                                        fort = ResourceHelper.GetImage("GymBlueRaid", null, null, 32, 32);
+                                    else
+                                        fort = ResourceHelper.GetImage("GymBlue", null, null, 32, 32);
                                     break;
                                 case POGOProtos.Enums.TeamColor.Red:
-                                    fort = ResourceHelper.GetImage("GymRed", null, null, 32, 32);
+                                    if (isRaid)
+                                        fort = ResourceHelper.GetImage("GymRedRaid", null, null, 32, 32);
+                                    else
+                                        fort = ResourceHelper.GetImage("GymRed", null, null, 32, 32);
                                     break;
                                 case POGOProtos.Enums.TeamColor.Yellow:
-                                    fort = ResourceHelper.GetImage("GymYellow", null, null, 32, 32);
+                                    if (isRaid)
+                                        fort = ResourceHelper.GetImage("GymYellowRaid", null, null, 32, 32);
+                                    else
+                                        fort = ResourceHelper.GetImage("GymYellow", null, null, 32, 32);
                                     break;
                             }
                             break;
@@ -437,6 +466,11 @@ namespace RocketBot2.Forms
             if (!_botStarted) return;
             var pos = GMapControl1.FromLocalToLatLng(e.Location.X, e.Location.Y);
             await SetMoveToTargetTask.Execute(pos.Lat, pos.Lng);
+        }
+
+        private void TrackBar_Scroll(object sender, EventArgs e)
+        {
+            GMapControl1.Zoom = trackBar.Value;
         }
 
         #endregion
@@ -807,13 +841,13 @@ namespace RocketBot2.Forms
         private async void TransferPokemon(IEnumerable<PokemonData> pokemons)
         {
             var _pokemons = new List<ulong>();
-            string poketotransfert = null;
+            string poketotransfer = null;
             foreach (var pokemon in pokemons)
             {
                 _pokemons.Add(pokemon.Id);
-                poketotransfert = $"{poketotransfert} [{_session.Translation.GetPokemonTranslation(pokemon.PokemonId)}]";
+                poketotransfer = $"{poketotransfer} [{_session.Translation.GetPokemonTranslation(pokemon.PokemonId)}]";
             }
-            DialogResult result = MessageBox.Show($"Do you want to tranfert {pokemons.Count()} Pokémons?\n\r {poketotransfert}", $"Tranfert {pokemons.Count()} Pokémons", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            DialogResult result = MessageBox.Show($"Do you want to tranfer {pokemons.Count()} Pokémons?\n\r {poketotransfer}", $"Tranfert {pokemons.Count()} Pokémons", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             switch (result)
             {
                 case DialogResult.Yes:
@@ -1296,7 +1330,7 @@ namespace RocketBot2.Forms
                             LogLevel.Error
                         );
                         _botStarted = true;
-                   }
+                    }
                     try
                     {
                         HttpClient client = new HttpClient();
@@ -1463,24 +1497,15 @@ namespace RocketBot2.Forms
             {
                 foreach (var _bot in accountManager.AccountsReadOnly)
                 {
-                    var _TotXP = 0;
-                    var _user = !string.IsNullOrEmpty(_bot.Nickname) ? _bot.Nickname : _bot.Username;
-
-                    for (int i = 0; i < _bot.Level + 1; i++)
-                    {
-                        _TotXP = _TotXP + Statistics.GetXpDiff(i);
-                    }
-
                     var _item = new ToolStripMenuItem()
                     {
-                        Text = _user
+                        Text = _bot.Username
                     };
                     _item.Click += delegate
                     {
                         if (!Instance._botStarted)
                             _session.ReInitSessionWithNextBot(_bot);
                         accountManager.SwitchAccountTo(_bot);
-                        Logger.Write($"User: {_user} | XP: {_bot.CurrentXp - _TotXP} | SD: {_bot.Stardust}", LogLevel.BotStats);
                     };
                     accountsToolStripMenuItem.DropDownItems.Add(_item);
                 }
@@ -1490,22 +1515,12 @@ namespace RocketBot2.Forms
                 menuStrip1.Items.Remove(accountsToolStripMenuItem);
             }
 
-
             var bot = accountManager.GetStartUpAccount();
-            var TotXP = 0;
-            var user = !string.IsNullOrEmpty(bot.Nickname) ? bot.Nickname : bot.Username;
-
-            for (int i = 0; i < bot.Level + 1; i++)
-            {
-                TotXP = TotXP + Statistics.GetXpDiff(i);
-            }
 
             _session.ReInitSessionWithNextBot(bot);
             _machine = machine;
             _settings = settings;
             _excelConfigAllow = excelConfigAllow;
-
-            Logger.Write($"User: {user} | XP: {bot.CurrentXp - TotXP} | SD: {bot.Stardust}", LogLevel.BotStats);
 
             if (_botStarted) startStopBotToolStripMenuItem.Text = @"■ Exit RocketBot2";
         }
@@ -1552,13 +1567,11 @@ namespace RocketBot2.Forms
                 //_session.EventDispatcher.EventReceived += evt => MSniperServiceTask.AddToList(evt);
             }
 
-            // jjskuld - Don't await the analytics service since it starts a worker thread that never returns.
-#pragma warning disable 4014
-            _session.AnalyticsService.StartAsync(_session, _session.CancellationTokenSource.Token);
-#pragma warning restore 4014
+            _session.AnalyticsService.StartAsync(_session, _session.CancellationTokenSource.Token).ConfigureAwait(false);
+
             _session.EventDispatcher.EventReceived += evt => AnalyticsService.Listen(evt, _session);
 
-            var trackFile = Path.GetTempPath() + "\\rocketbot2.io";
+            /*var trackFile = Path.GetTempPath() + "\\rocketbot2.io";
 
             if (!File.Exists(trackFile) || File.GetLastWriteTime(trackFile) < DateTime.Now.AddDays(-1))
             {
@@ -1572,7 +1585,7 @@ namespace RocketBot2.Forms
                 mThread.SetApartmentState(ApartmentState.STA);
 
                 mThread.Start();
-            }
+            }*/
 
             QuitEvent.WaitOne();
             return Task.CompletedTask;
@@ -1621,8 +1634,8 @@ namespace RocketBot2.Forms
                         {
                             Logger.Write(strReason1 + $"\n", LogLevel.Warning);
 
-                            Logger.Write(strExitMsg + $"\n" + "Please press enter to continue", LogLevel.Error);
-                            Console.ReadLine();
+                            /*Logger.Write(strExitMsg + $"\n" + "Please press enter to continue", LogLevel.Error);
+                            Console.ReadLine();*/
                             return true;
                         }
                         else
@@ -1727,6 +1740,5 @@ namespace RocketBot2.Forms
         }
 
         #endregion
-
     }
 }
