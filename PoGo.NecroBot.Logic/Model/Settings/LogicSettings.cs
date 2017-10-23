@@ -83,6 +83,7 @@ namespace PoGo.NecroBot.Logic.Model.Settings
         public int KeepMinCp => _settings.PokemonConfig.KeepMinCp;
         public int KeepMinLvl => _settings.PokemonConfig.KeepMinLvl;
         public bool UseKeepMinLvl => _settings.PokemonConfig.UseKeepMinLvl;
+        public bool KeepPokemonsToBeEvolved => _settings.PokemonConfig.KeepPokemonsToBeEvolved;
         public bool AutomaticallyLevelUpPokemon => _settings.PokemonConfig.AutomaticallyLevelUpPokemon;
         public bool OnlyUpgradeFavorites => _settings.PokemonConfig.OnlyUpgradeFavorites;
         public double UpgradePokemonLvlMinimum => _settings.PokemonConfig.UpgradePokemonLvlMinimum;
@@ -102,15 +103,7 @@ namespace PoGo.NecroBot.Logic.Model.Settings
         public bool ShowVariantWalking => _settings.LocationConfig.ShowVariantWalking;
         public bool FastSoftBanBypass => _settings.SoftBanConfig.FastSoftBanBypass;
         public int ByPassSpinCount => _settings.SoftBanConfig.ByPassSpinCount;
-        public bool EvolveAllPokemonWithEnoughCandy => _settings.PokemonConfig.EvolveAllPokemonWithEnoughCandy;
-        public bool EvolveFavoritedOnly => _settings.PokemonConfig.EvolveFavoritedOnly;
-        public string EvolveOperator => _settings.PokemonConfig.EvolveOperator;
-        public double EvolveMinIV => _settings.PokemonConfig.EvolveMinIV;
-        public double EvolveMinCP => _settings.PokemonConfig.EvolveMinCP;
-        public double EvolveMinLevel => _settings.PokemonConfig.EvolveMinLevel;
         public bool ByPassCatchFlee => _settings.PokemonConfig.ByPassCatchFlee;
-
-        public bool KeepPokemonsThatCanEvolve => _settings.PokemonConfig.KeepPokemonsThatCanEvolve;
         public bool TransferDuplicatePokemon => _settings.PokemonConfig.TransferDuplicatePokemon;
         public bool TransferDuplicatePokemonOnCapture => _settings.PokemonConfig.TransferDuplicatePokemonOnCapture;
         public bool UseBulkTransferPokemon => _settings.PokemonConfig.UseBulkTransferPokemon;
@@ -120,6 +113,8 @@ namespace PoGo.NecroBot.Logic.Model.Settings
         public bool SkipCollectingLevelUpRewards => _settings.PlayerConfig.SkipCollectingLevelUpRewards;
         public int BulkTransferSize => _settings.PokemonConfig.BulkTransferSize;
         public int BulkTransferStogareBuffer => _settings.PokemonConfig.BulkTransferStogareBuffer;
+        public bool AutoWalkAI => _settings.PlayerConfig.AutoWalkAI;
+        public int AutoWalkDist => _settings.PlayerConfig.AutoWalkDist;
 
         public bool UseEggIncubators => _settings.PokemonConfig.UseEggIncubators;
         public bool UseLimitedEggIncubators => _settings.PokemonConfig.UseLimitedEggIncubators;
@@ -161,10 +156,6 @@ namespace PoGo.NecroBot.Logic.Model.Settings
         public bool StartFromLastPosition => _settings.LocationConfig.StartFromLastPosition;
         public string GpxFile => _settings.GPXConfig.GpxFile;
         public bool UseGpxPathing => _settings.GPXConfig.UseGpxPathing;
-        public bool UseLuckyEggsWhileEvolving => _settings.PokemonConfig.UseLuckyEggsWhileEvolving;
-        public int UseLuckyEggsMinPokemonAmount => GenRandom(_settings.PokemonConfig.UseLuckyEggsMinPokemonAmount);
-        public bool EvolveAllPokemonAboveIv => _settings.PokemonConfig.EvolveAllPokemonAboveIv;
-        public float EvolveAboveIvValue => _settings.PokemonConfig.EvolveAboveIvValue;
         public bool RenamePokemon => _settings.PokemonConfig.RenamePokemon;
         public bool RenamePokemonRespectTransferRule => _settings.PokemonConfig.RenamePokemonRespectTransferRule;
         public bool RenameOnlyAboveIv => _settings.PokemonConfig.RenameOnlyAboveIv;
@@ -182,8 +173,6 @@ namespace PoGo.NecroBot.Logic.Model.Settings
         public bool DetailedCountsBeforeRecycling => _settings.ConsoleConfig.DetailedCountsBeforeRecycling;
         public bool VerboseRecycling => _settings.RecycleConfig.VerboseRecycling;
         public double RecycleInventoryAtUsagePercentage => GenRandom(_settings.RecycleConfig.RecycleInventoryAtUsagePercentage);
-        public double EvolveKeptPokemonsAtStorageUsagePercentage => GenRandom(_settings.PokemonConfig.EvolveKeptPokemonsAtStorageUsagePercentage);
-        public int EvolveKeptPokemonIfBagHasOverThisManyPokemon => GenRandom(_settings.PokemonConfig.EvolveKeptPokemonIfBagHasOverThisManyPokemon);
         public Dictionary<ItemId, ItemUseFilter> ItemUseFilters => _settings.ItemUseFilters;
 
         public ICollection<KeyValuePair<ItemId, int>> ItemRecycleFilter => _settings.ItemRecycleFilter.Select(itemRecycleFilter => new KeyValuePair<ItemId, int>(itemRecycleFilter.Key, itemRecycleFilter.Value)).ToList();
@@ -197,6 +186,7 @@ namespace PoGo.NecroBot.Logic.Model.Settings
         public Dictionary<PokemonId, SnipeFilter> PokemonSnipeFilters => _settings.SnipePokemonFilter;
         public Dictionary<PokemonId, EvolveFilter> PokemonEvolveFilters => _settings.PokemonEvolveFilter;
         public bool StartupWelcomeDelay => _settings.ConsoleConfig.StartupWelcomeDelay;
+
         public bool UseGoogleWalk => _settings.GoogleWalkConfig.UseGoogleWalk;
         public double DefaultStepLength => _settings.GoogleWalkConfig.DefaultStepLength;
         public bool UseGoogleWalkCache => _settings.GoogleWalkConfig.Cache;
@@ -228,12 +218,14 @@ namespace PoGo.NecroBot.Logic.Model.Settings
         public int TotalAmountOfPotionsToKeep => GenRandom(_settings.RecycleConfig.TotalAmountOfPotionsToKeep);
         public int TotalAmountOfRevivesToKeep => GenRandom(_settings.RecycleConfig.TotalAmountOfRevivesToKeep);
         public int TotalAmountOfBerriesToKeep => GenRandom(_settings.RecycleConfig.TotalAmountOfBerriesToKeep);
+        public int TotalAmountOfEvolutionToKeep => GenRandom(_settings.RecycleConfig.TotalAmountOfEvolutionToKeep);
 
         public bool UseRecyclePercentsInsteadOfTotals => _settings.RecycleConfig.UseRecyclePercentsInsteadOfTotals;
         public int PercentOfInventoryPokeballsToKeep => GenRandom(_settings.RecycleConfig.PercentOfInventoryPokeballsToKeep);
         public int PercentOfInventoryPotionsToKeep => GenRandom(_settings.RecycleConfig.PercentOfInventoryPotionsToKeep);
         public int PercentOfInventoryRevivesToKeep => GenRandom(_settings.RecycleConfig.PercentOfInventoryRevivesToKeep);
         public int PercentOfInventoryBerriesToKeep => GenRandom(_settings.RecycleConfig.PercentOfInventoryBerriesToKeep);
+        public int PercentOfInventoryEvolutionToKeep => GenRandom(_settings.RecycleConfig.PercentOfInventoryEvolutionToKeep);
 
         public bool UseSnipeLimit => _settings.SnipeConfig.UseSnipeLimit;
         public bool UsePokeStopLimit => _settings.PokeStopConfig.UsePokeStopLimit;
@@ -292,6 +284,21 @@ namespace PoGo.NecroBot.Logic.Model.Settings
         public int CatchFleeDelay => _settings.HumanlikeDelays.CatchFleeDelay;
         public int CatchMissedDelay => _settings.HumanlikeDelays.CatchMissedDelay;
         public int BeforeCatchDelay => _settings.HumanlikeDelays.BeforeCatchDelay;
-
+        #region Evolve
+        public bool EvolvePokemonsThatMatchFilter => _settings.PokemonConfig.EvolveConfig.EvolvePokemonsThatMatchFilter;
+        public bool EvolveAnyPokemonAboveIv => _settings.PokemonConfig.EvolveConfig.EvolveAnyPokemonAboveIv;
+        public float EvolveAnyPokemonAboveIvValue => _settings.PokemonConfig.EvolveConfig.EvolveAnyPokemonAboveIvValue;
+        public bool TriggerEvolveAsSoonAsFilterIsMatched => _settings.PokemonConfig.EvolveConfig.TriggerAsSoonAsFilterIsMatched;
+        public bool TriggerEvolveOnEvolutionCount => _settings.PokemonConfig.EvolveConfig.TriggerOnEvolutionCount;
+        public int TriggerEvolveOnEvolutionCountValue => _settings.PokemonConfig.EvolveConfig.TriggerOnEvolutionCountValue;
+        public bool TriggerEvolveOnStorageUsagePercentage => _settings.PokemonConfig.EvolveConfig.TriggerOnStorageUsagePercentage;
+        public double TriggerEvolveOnStorageUsagePercentageValue => GenRandom(_settings.PokemonConfig.EvolveConfig.TriggerOnStorageUsagePercentageValue);
+        public bool TriggerEvolveOnStorageUsageAbsolute => _settings.PokemonConfig.EvolveConfig.TriggerOnStorageUsageAbsolute;
+        public int TriggerEvolveOnStorageUsageAbsoluteValue => GenRandom(_settings.PokemonConfig.EvolveConfig.TriggerOnStorageUsageAbsoluteValue);
+        public bool TriggerEvolveIfLuckyEggIsActive => _settings.PokemonConfig.EvolveConfig.TriggerIfLuckyEggIsActive;
+        public bool EvolvePreserveMinCandiesFromFilter => _settings.PokemonConfig.EvolveConfig.PreserveMinCandiesFromFilter;
+        public bool EvolveApplyLuckyEggOnEvolutionCount => _settings.PokemonConfig.EvolveConfig.ApplyLuckyEggOnEvolutionCount;
+        public int EvolveApplyLuckyEggOnEvolutionCountValue => _settings.PokemonConfig.EvolveConfig.ApplyLuckyEggOnEvolutionCountValue;
+        #endregion
     }
 }

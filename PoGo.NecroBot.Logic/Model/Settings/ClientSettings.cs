@@ -92,6 +92,48 @@ namespace PoGo.NecroBot.Logic.Model.Settings
             set { _settings.Auth.CurrentAuthConfig.AutoExitBotIfAccountFlagged = value; }
         }
 
+        double ISettings.AccountLatitude
+        {
+            get { return _settings.Auth.CurrentAuthConfig.AccountLatitude; }
+            set { _settings.Auth.CurrentAuthConfig.AccountLatitude = value; }
+        }
+
+        double ISettings.AccountLongitude
+        {
+            get { return _settings.Auth.CurrentAuthConfig.AccountLongitude; }
+            set { _settings.Auth.CurrentAuthConfig.AccountLongitude = value; }
+        }
+
+        bool ISettings.AccountActive
+        {
+            get { return _settings.Auth.CurrentAuthConfig.AccountActive; }
+            set { _settings.Auth.CurrentAuthConfig.AccountActive = value; }
+        }
+
+        string ISettings.Country
+        {
+            get { return _settings.Auth.CurrentAuthConfig.Country; }
+            set { _settings.Auth.CurrentAuthConfig.Country = value; }
+        }
+
+        string ISettings.Language
+        {
+            get { return _settings.Auth.CurrentAuthConfig.Language; }
+            set { _settings.Auth.CurrentAuthConfig.Language = value; }
+        }
+
+        string ISettings.TimeZone
+        {
+            get { return _settings.Auth.CurrentAuthConfig.TimeZone; }
+            set { _settings.Auth.CurrentAuthConfig.TimeZone = value; }
+        }
+
+        string ISettings.POSIX
+        {
+            get { return _settings.Auth.CurrentAuthConfig.POSIX; }
+            set { _settings.Auth.CurrentAuthConfig.POSIX = value; }
+        }
+
         #endregion Auth Config Values
 
         #region Device Config Values
@@ -229,10 +271,10 @@ namespace PoGo.NecroBot.Logic.Model.Settings
             set { _settings.Auth.APIConfig.UsePogoDevAPI = value; }
         }
 
-        public bool UseLegacyAPI
+        public bool UseCustomAPI
         {
-            get { return _settings.Auth.APIConfig.UseLegacyAPI; }
-            set { _settings.Auth.APIConfig.UseLegacyAPI = value; }
+            get { return _settings.Auth.APIConfig.UseCustomAPI; }
+            set { _settings.Auth.APIConfig.UseCustomAPI = value; }
         }
 
         public string AuthAPIKey
@@ -245,6 +287,18 @@ namespace PoGo.NecroBot.Logic.Model.Settings
         {
             get { return _settings.Auth.APIConfig.DiplayHashServerLog; }
             set { _settings.Auth.APIConfig.DiplayHashServerLog = value; }
+        }
+
+        public string UrlHashServices
+        {
+            get { return _settings.Auth.APIConfig.UrlHashServices; }
+            set { _settings.Auth.APIConfig.UrlHashServices = value; }
+        } 
+
+        public string EndPoint
+        {
+            get { return _settings.Auth.APIConfig.EndPoint; }
+            set { _settings.Auth.APIConfig.EndPoint = value; }
         }
     }
 }

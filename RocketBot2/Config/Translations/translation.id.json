@@ -82,7 +82,7 @@
     },
     {
       "Key": "eventFortUsed",
-      "Value": "Sampai di: {0} | Mendapatkan: {1} EXP, Gem: {2} | Barang: {3} | Koordinat: {4}, {5} | Ketinggian elevasi: {6}"
+      "Value": "Name: {0} | XP: {1} | Gems: {2} | Items: {3} | Badges: {4} | BonusLoot: {5} | RaidTickets: {6} | TeamBonusLoot: {7} | PokemonEgg: {8} (Eggs: {9}) | Lat: {10} Long: {11} | Alt: {12}"
     },
     {
       "Key": "eventFortFailed",
@@ -98,7 +98,7 @@
     },
     {
       "Key": "eventFortTargeted",
-      "Value": "Jalan ke {0}: {1} | Jarak: {2} meter | Waktu tempuh: {3} detik | Menggunakan: Rute {4}"
+      "Value": "Jalan ke {0}m({1} sec) via'{2}' to next {3}: {4}"
     },
     {
       "Key": "eventProfileLogin",
@@ -134,11 +134,11 @@
     },
     {
       "Key": "eventPokemonCaptureSuccess",
-      "Value": "({0}) | ({1}) {2} | Lvl: {3} CP: {4}/{5} IV: {6}% | Kemungkinan: {7}% | Jarak: {8} meter | Menggunakan: {9} (Sisa {10}) | Mendapatkan: {11} EXP | {12} | Koordinat: {13}, {14} | Jurus: 1 {15} - 2 {16} | Kelangkaan: {17}"
+      "Value": "({0}) | ({1}) {2} | Lvl: {3} | CP: {4}/{5} | IV: {6}% | Chance: {7}% | {8}m dist | with a {9} ({10} left) | XP: {11} | SD: {12} | {13} | lat: {14} long: {15} | Move1: {16} Move2: {17} | Rarity: {18} | Capture Reason: {19} | Shiny: {20} | Form: {21} | Costume: {22} | Sex: {23}"
     },
     {
       "Key": "eventPokemonCaptureFailed",
-      "Value": "({0}) | ({1}) {2} | Lvl: {3} CP: {4}/{5} IV: {6}% | Kemungkinan: {7}% | Jarak: {8} meter | Menggunakan: {9} (Sisa {10}) | Koordinat: {11}, {12} | Jurus: 1 {13} - 2 {14} | Kelangkaan: {15}"
+      "Value": "({0}) | ({1}) {2} | Lvl: {3} | CP: {4}/{5} | IV: {6}% | Chance: {7}% | {8}m dist | with a {9} ({10} left) | XP: {11} | lat: {12} long: {13} | Move1: {14} Move2: {15} | Rarity :{16}"
     },
     {
       "Key": "eventNoPokeballs",
@@ -147,6 +147,10 @@
     {
       "Key": "waitingForMorePokemonToEvolve",
       "Value": "Menunggu untuk evolusi {0} Pokemon, setelah {1} lagi tertangkap! ({2}/{3} dari {4}% inventaris)"
+    },
+	{
+      "Key": "WaitingForMoreEvolutionsToEvolve",
+      "Value": "Waiting for {0} more evolutions to start evolving! (Possible: {1} | Needed: {2})"
     },
     {
       "Key": "useLuckyEggsMinPokemonAmountTooHigh",
@@ -288,6 +292,10 @@
       "Key": "logEntryGym",
       "Value": "GYM"
     },
+	{
+      "Key": "logEntryGymDisk",
+      "Value": "GYM DISK"
+    },
     {
       "Key": "logEntrySoftBan",
       "Value": "SOFTBAN"
@@ -382,23 +390,23 @@
     },
     {
       "Key": "currentPokeballInv",
-      "Value": "PokeBall: {0} | GreatBall: {1} | UltraBall: {2} | MasterBall: {3}"
+      "Value": "PokeBall:  {0} | GreatBall:    {1} | UltraBall:    {2} | MasterBall:   {3}"
     },
     {
       "Key": "CurrentPotionInv",
-      "Value": "Potion: {0} | SuperPotion: {1} | HyperPotion: {2} | MaxPotion: {3}"
+      "Value": "Potion:    {0} | SuperPotion:  {1} | HyperPotion:  {2} | MaxPotion:    {3}"
     },
     {
       "Key": "CurrentReviveInv",
-      "Value": "Revive: {0} | MaxRevive: {1}"
+      "Value": "Revives:   {0} | MaxRevives:   {1} | Evolve Items: {2} | Raid Tickets: {3}"
     },
     {
       "Key": "CurrentMiscItemInv",
-      "Value": "Berry: {0} | Incense: {1} | Lucky Egg: {2} | Lure: {3}"
+      "Value": "Berry:     {0} | Incense:      {1} | Lucky Egg:    {2} | Lure:         {3}"
     },
     {
       "Key": "maxItemsCombinedOverMaxItemStorage",
-      "Value": "[Konfigurasi Salah] Total barang (ball+potion+revive={0}) melebihi kapasitas tasmu ({1})"
+      "Value": "[Konfigurasi Salah] Total barang (ball+potion+revive+Evolution={0}) melebihi kapasitas tasmu ({1})"
     },
     {
       "Key": "recyclingQuietly",
@@ -598,7 +606,7 @@
     },
     {
       "Key": "amountPkmSeenCaught",
-      "Value": "Jumlah Pokemon terlihat: {0}/251, Tertangkap: {1}/251"
+      "Value": "Jumlah Pokemon terlihat: {0}/{1}, Tertangkap: {2}/{3}"
     },
     {
       "Key": "pkmPotentialEvolveCount",

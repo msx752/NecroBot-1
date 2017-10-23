@@ -74,7 +74,7 @@
     },
     {
       "Key": "eventFortUsed",
-      "Value": "Název: {0} Zk: {1}, Gems: {2}, Předmětů: {3}"
+      "Value": "Name: {0} | XP: {1} | Gems: {2} | Items: {3} | Badges: {4} | BonusLoot: {5} | RaidTickets: {6} | TeamBonusLoot: {7} | PokemonEgg: {8} (Eggs: {9}) | Lat: {10} Long: {11} | Alt: {12}"
     },
     {
       "Key": "eventFortFailed",
@@ -90,7 +90,7 @@
     },
     {
       "Key": "eventFortTargeted",
-      "Value": "Chůze k {0}: {1} ({2}m) ({3} sekund) (route {4})"
+      "Value": "Chůze k {0}m({1} sec) via'{2}' to next {3}: {4}"
     },
     {
       "Key": "eventProfileLogin",
@@ -118,11 +118,11 @@
     },
     {
       "Key": "eventPokemonCaptureSuccess",
-      "Value": "({0}) | ({1}) {2} | Lvl: {3} CP: {4}/{5} IV: {6}% | Chance: {7}% | {8}m dist | with a {9} ({10} left). | {11} EXP earned | {12} | lat: {13} long: {14} | Move1: {15} Move2: {16}"
+      "Value": "({0}) | ({1}) {2} | Lvl: {3} | CP: {4}/{5} | IV: {6}% | Chance: {7}% | {8}m dist | with a {9} ({10} left) | XP: {11} | SD: {12} | {13} | lat: {14} long: {15} | Move1: {16} Move2: {17} | Rarity: {18} | Capture Reason: {19} | Shiny: {20} | Form: {21} | Costume: {22} | Sex: {23}"
     },
     {
       "Key": "eventPokemonCaptureFailed",
-      "Value": "({0}) | ({1}) {2} | Lvl: {3} CP: {4}/{5} IV: {6}% | Chance: {7}% | {8}m dist | with a {9} ({10} left). | lat: {11} long: {12} | Move1: {13} Move2: {14}"
+      "Value": "({0}) | ({1}) {2} | Lvl: {3} | CP: {4}/{5} | IV: {6}% | Chance: {7}% | {8}m dist | with a {9} ({10} left) | XP: {11} | lat: {12} long: {13} | Move1: {14} Move2: {15} | Rarity :{16}"
     },
     {
       "Key": "eventNoPokeballs",
@@ -322,19 +322,19 @@
     },
     {
       "Key": "currentPokeballInv",
-      "Value": "Pokebally: {0} | Superbally: {1} | Ultrabally: {2} | Masterbally: {3}"
+      "Value": "Pokebally: {0} | Superbally:    {1} | Ultrabally:    {2} | Masterbally:  {3}"
     },
     {
       "Key": "CurrentPotionInv",
-      "Value": "Lektvar: {0} | Super-Lektvar: {1} | Hyper-Lektvar: {2} | Max-Lektvar: {3}"
+      "Value": "Lektvar:   {0} | Super-Lektvar: {1} | Hyper-Lektvar: {2} | Max-Lektvar:  {3}"
     },
     {
       "Key": "CurrentReviveInv",
-      "Value": "Oživení: {0} | Plné Oživení: {1}"
+      "Value": "Revives:   {0} | MaxRevives:    {1} | Evolve Items:  {2} | Raid Tickets: {3}"
     },
     {
       "Key": "CurrentMiscItemInv",
-      "Value": "Maliny: {0} | Kadidlo: {1} | Šťastné vejce: {2} | Návnada: {3}"
+      "Value": "Maliny:    {0} | Kadidlo:       {1} | Šťastné vejce: {2} | Návnada:      {3}"
     },
     {
       "Key": "invFullTransferring",
@@ -518,7 +518,7 @@
     },
     {
       "Key": "AmountPkmSeenCaught",
-      "Value": "Počet spatřených pokemonů: {0}/251, Počet chycených pokemonů: {1}/251"
+      "Value": "Počet spatřených pokemonů: {0}/{1}, Počet chycených pokemonů: {2}/{3}"
     },
     {
       "Key": "PkmPotentialEvolveCount",
@@ -531,6 +531,10 @@
     {
       "Key": "waitingForMorePokemonToEvolve",
       "Value": "Čekání na vývin {0} pokemů najednou, zbývá {1} chytit! ({2}/{3} pro {4}% batohu)"
+    },
+	{
+      "Key": "WaitingForMoreEvolutionsToEvolve",
+      "Value": "Waiting for {0} more evolutions to start evolving! (Possible: {1} | Needed: {2})"
     },
     {
       "Key": "PokedexCatchedTelegram",

@@ -46,7 +46,7 @@ namespace PoGo.NecroBot.Logic.Utils
         {
             await Task.Run(() =>
             {
-                var fromAddress = new MailAddress(cfg.GmailUsername, "Necrobot Notifier");
+                var fromAddress = new MailAddress(cfg.GmailUsername, "NecroBot Notifier");
                 //var toAddress = new MailAddress(cfg.Recipients);
 
                 string fromPassword = cfg.GmailPassword;
@@ -99,7 +99,7 @@ namespace PoGo.NecroBot.Logic.Utils
                 {
                     if (cfg.EnablePushBulletNotification)
                     {
-                        await SendPushNotificationV2(cfg.PushBulletApiKey, title, body).ConfigureAwait(false);
+                        await SendPushNotificationV2(cfg.PushBulletApiKey, $"{DateTime.Now:MMM dd, yy @ HH:mm}\r\n" + title, body).ConfigureAwait(false);
                     }
                     // TODO function is deprecated / obsolete
                     // jjskuld - Ignore CS0618 warning for now.

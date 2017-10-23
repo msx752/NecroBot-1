@@ -78,7 +78,7 @@
     },
     {
       "Key": "eventFortUsed",
-      "Value": "Nev: {0} Tapasztalat: {1}, Dragakovek: {2}, targyak: {3}"
+      "Value": "Name: {0} | XP: {1} | Gems: {2} | Items: {3} | Badges: {4} | BonusLoot: {5} | RaidTickets: {6} | TeamBonusLoot: {7} | PokemonEgg: {8} (Eggs: {9}) | Lat: {10} Long: {11} | Alt: {12}"
     },
     {
       "Key": "eventFortFailed",
@@ -94,7 +94,7 @@
     },
     {
       "Key": "eventFortTargeted",
-      "Value": "Erkezes {0}: {1} ({2}m) ({3} seconds) (route {4})"
+      "Value": "Erkezes {0}m({1} sec) via'{2}' to next {3}: {4}"
     },
     {
       "Key": "eventProfileLogin",
@@ -126,11 +126,11 @@
     },
     {
       "Key": "eventPokemonCaptureSuccess",
-      "Value": "({0}) | ({1}) {2} | Lvl: {3} CP: {4}/{5} IV: {6}% | Esely: {7}% | {8}m tavolsagra | hasznalva: {9} ({10} maradt). | {11} kapott EXP | {12} | szel.: {13} hossz.: {14} | Move1: {15} Move2: {16}"
+      "Value": "({0}) | ({1}) {2} | Lvl: {3} | CP: {4}/{5} | IV: {6}% | Chance: {7}% | {8}m dist | with a {9} ({10} left) | XP: {11} | SD: {12} | {13} | lat: {14} long: {15} | Move1: {16} Move2: {17} | Rarity: {18} | Capture Reason: {19} | Shiny: {20} | Form: {21} | Costume: {22} | Sex: {23}"
     },
     {
       "Key": "eventPokemonCaptureFailed",
-      "Value": "({0}) | ({1}) {2} | Lvl: {3} CP: {4}/{5} IV: {6}% | Esely: {7}% | {8}m tavolsagra | hasznalva: {9} ({10} maradt). | szel.: {11} hossz.: {12} | Move1: {13} Move2: {14}"
+      "Value": "({0}) | ({1}) {2} | Lvl: {3} | CP: {4}/{5} | IV: {6}% | Chance: {7}% | {8}m dist | with a {9} ({10} left) | XP: {11} | lat: {12} long: {13} | Move1: {14} Move2: {15} | Rarity :{16}"
     },
     {
       "Key": "eventNoPokeballs",
@@ -139,6 +139,10 @@
     {
       "Key": "waitingForMorePokemonToEvolve",
       "Value": "Varakozas a fejlesztesevel: {0} Meg {1} darabot kell elkapni a ({2}/{3} {4}%-os tarolokapacitashoz)"
+    },
+	{
+      "Key": "WaitingForMoreEvolutionsToEvolve",
+      "Value": "Waiting for {0} more evolutions to start evolving! (Possible: {1} | Needed: {2})"
     },
     {
       "Key": "useLuckyEggsMinPokemonAmountTooHigh",
@@ -382,19 +386,19 @@
     },
     {
       "Key": "currentPotionInv",
-      "Value": "Fozetek: {0} | Szuper fozetek: {1} | Hiper fozetek: {2} | Maximum fozeteks: {3}"
+      "Value": "Fozetek:    {0} | Szuper fozetek:    {1} | Hiper fozetek:    {2} | Maximum fozeteks:  {3}"
     },
     {
       "Key": "currentReviveInv",
-      "Value": "Ujraeleszto: {0} | Maximum ujraeleszto: {1}"
+      "Value": "Revives:    {0} | MaxRevives:        {1} | Evolve Items:     {2} | Raid Tickets:      {3}"
     },
     {
       "Key": "currentMiscItemInv",
-      "Value": "Malnak: {0} | Vonzok: {1} | Szerencsetojasok: {2} | Csalik: {3}"
+      "Value": "Malnak:     {0} | Vonzok:            {1} | Szerencsetojasok: {2} | Csalik:            {3}"
     },
     {
       "Key": "maxItemsCombinedOverMaxItemStorage",
-      "Value": "[Hibas beallitas] Az altalad beallitott maximum targyak (labdak+fozetek+ujraelesztok={0}) tobb, mint a maximum kapacitasa a hatizsakodnak({1})"
+      "Value": "[Hibas beallitas] Az altalad beallitott maximum targyak (labdak+fozetek+ujraelesztok+Evolution={0}) tobb, mint a maximum kapacitasa a hatizsakodnak({1})"
     },
     {
       "Key": "recyclingQuietly",
@@ -594,7 +598,7 @@
     },
     {
       "Key": "amountPkmSeenCaught",
-      "Value": "Latott pokemonok: {0}/251, Elkapott pokemonok: {1}/251"
+      "Value": "Latott pokemonok: {0}/{1}, Elkapott pokemonok: {2}/{3}"
     },
     {
       "Key": "pkmPotentialEvolveCount",

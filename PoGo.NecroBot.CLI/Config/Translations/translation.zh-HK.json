@@ -78,7 +78,7 @@
     },
     {
       "Key": "eventFortUsed",
-      "Value": "名稱：{0} 經驗值：{1}, 金幣：{2}, 物品：{3}"
+      "Value": "Name: {0} | XP: {1} | Gems: {2} | Items: {3} | Badges: {4} | BonusLoot: {5} | RaidTickets: {6} | TeamBonusLoot: {7} | PokemonEgg: {8} (Eggs: {9}) | Lat: {10} Long: {11} | Alt: {12}"
     },
     {
       "Key": "eventFortFailed",
@@ -94,7 +94,7 @@
     },
     {
       "Key": "eventFortTargeted",
-      "Value": "{0} 前往補給站：{1} (距離{2}公尺) ({3} seconds) (route {4})"
+      "Value": "Traveling {0}m({1} sec) via'{2}' to next {3}: {4}"
     },
     {
       "Key": "eventProfileLogin",
@@ -126,11 +126,11 @@
     },
     {
       "Key": "eventPokemonCaptureSuccess",
-      "Value": "({0}) | ({1}) {2} | 等級: {3} CP: {4}/{5} IV: {6}% | 捕獲機率: {7}% | 距離{8}公尺 | 使用{9}捕捉 (剩餘{10}個) | 經驗值+{11} | {12} | 座標: {13},{14} | Move1: {15} Move2: {16}"
+      "Value": "({0}) | ({1}) {2} | Lvl: {3} | CP: {4}/{5} | IV: {6}% | Chance: {7}% | {8}m dist | with a {9} ({10} left) | XP: {11} | SD: {12} | {13} | lat: {14} long: {15} | Move1: {16} Move2: {17} | Rarity: {18} | Capture Reason: {19} | Shiny: {20} | Form: {21} | Costume: {22} | Sex: {23}"
     },
     {
       "Key": "eventPokemonCaptureFailed",
-      "Value": "({0}) | ({1}) {2} | 等級: {3} CP: {4}/{5} IV: {6}% | 捕獲機率: {7}% | 距離{8}公尺 | 使用{9}捕捉 (剩餘{10}個) | 座標: {11},{12} | Move1: {13} Move2: {14}"
+      "Value": "({0}) | ({1}) {2} | Lvl: {3} | CP: {4}/{5} | IV: {6}% | Chance: {7}% | {8}m dist | with a {9} ({10} left) | XP: {11} | lat: {12} long: {13} | Move1: {14} Move2: {15} | Rarity :{16}"
     },
     {
       "Key": "eventNoPokeballs",
@@ -139,6 +139,10 @@
     {
       "Key": "waitingForMorePokemonToEvolve",
       "Value": "目前有 {0} 隻小精靈，再捕捉 {1} 隻小精靈後將會進化! (目前有 {2}/{3} 佔背包總量的 {4}% )"
+    },
+	{
+      "Key": "WaitingForMoreEvolutionsToEvolve",
+      "Value": "Waiting for {0} more evolutions to start evolving! (Possible: {1} | Needed: {2})"
     },
     {
       "Key": "useLuckyEggsMinPokemonAmountTooHigh",
@@ -374,23 +378,23 @@
     },
     {
       "Key": "currentPokeballInv",
-      "Value": "精靈球: {0} | 高級球: {1} | 超級球: {2} | 掌門球: {3}"
+      "Value": "精靈球:    {0} | 高級球:      {1} | 超級球:        {2} | 掌門球:       {3}"
     },
     {
       "Key": "CurrentPotionInv",
-      "Value": "藥水: {0} | 超級藥水: {1} | 超高級藥水: {2} | 全滿藥水: {3}"
+      "Value": "藥水:      {0} | 超級藥水:    {1} | 超高級藥水:    {2} | 全滿藥水:      {3}"
     },
     {
       "Key": "CurrentReviveInv",
-      "Value": "更生劑: {0} | 特級更生劑: {1}"
+      "Value": "Revives:   {0} | MaxRevives: {1} | Evolve Items: {2} | Raid Tickets: {3}"
     },
     {
       "Key": "CurrentMiscItemInv",
-      "Value": "樹果: {0} | 薰香: {1} | 幸運蛋: {2} | 誘餌: {3}"
+      "Value": "樹果:      {0} | 薰香:        {1} | 幸運蛋:       {2} | 誘餌:          {3}"
     },
     {
       "Key": "maxItemsCombinedOverMaxItemStorage",
-      "Value": "[錯誤] 您設定的物品數量錯誤 (精靈球+藥水+更生劑={0}) 數量已超過您背包最大容量 ({1})"
+      "Value": "[錯誤] 您設定的物品數量錯誤 (精靈球+藥水+更生劑+Evolution={0}) 數量已超過您背包最大容量 ({1})"
     },
     {
       "Key": "recyclingQuietly",
@@ -590,7 +594,7 @@
     },
     {
       "Key": "amountPkmSeenCaught",
-      "Value": "見過的小精靈: {0}/251, 捕捉過的小精靈: {1}/251"
+      "Value": "見過的小精靈: {0}/{1}, 捕捉過的小精靈: {2}/{3}"
     },
     {
       "Key": "pkmPotentialEvolveCount",

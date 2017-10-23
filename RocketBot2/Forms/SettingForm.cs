@@ -1,8 +1,12 @@
-﻿using GMap.NET;
+using GMap.NET;
 using GMap.NET.MapProviders;
+using PoGo.NecroBot.Logic;
+using PoGo.NecroBot.Logic.Model;
 using PoGo.NecroBot.Logic.Model.Settings;
+using PoGo.NecroBot.Logic.State;
 using POGOProtos.Enums;
 using PokemonGo.RocketAPI.Enums;
+using PokemonGo.RocketAPI.Helpers;
 using RocketBot2.Forms.advSettings;
 using RocketBot2.Helpers;
 using RocketBot2.Win32;
@@ -14,38 +18,70 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
+using TinyIoC;
 
 namespace RocketBot2.Forms
 {
     internal partial class SettingsForm : System.Windows.Forms.Form
     {
         private const int DefaultZoomLevel = 15;
+        private AccountConfigContext _context = new AccountConfigContext();
+        private static string[] args;
 
         private static readonly string ConfigFolderPath = Path.Combine(Directory.GetCurrentDirectory(), "Config");
         private static readonly string AuthFilePath = Path.Combine(ConfigFolderPath, "auth.json");
         private static readonly string ConfigFilePath = Path.Combine(ConfigFolderPath, "config.json");
         private static readonly string LanguagePath = Path.Combine(ConfigFolderPath, "Translations");
-        private readonly DeviceHelper _deviceHelper;
-        private readonly List<DeviceInfo> _deviceInfos;
-        private readonly GlobalSettings _settings;
+        public static GlobalSettings _settings;
+        public static MultiAccountManager accountManager;
+        private readonly ISession _session;
 
-        public SettingsForm(ref GlobalSettings settings)
+        public SettingsForm(ref GlobalSettings settings, ISession session, string[] _args)
         {
             InitializeComponent();
             _settings = settings;
+            _session = session;
 
-            _deviceHelper = new DeviceHelper();
-            _deviceInfos = _deviceHelper.DeviceBucket;
+            args = _args;
+            var Pokemons = Enum.GetValues(typeof(PokemonId)).Cast<PokemonId>().Where(id => id != PokemonId.Missingno);
 
-            foreach (
-                var pokemon in
-                    Enum.GetValues(typeof(PokemonId)).Cast<PokemonId>().Where(id => id != PokemonId.Missingno))
+            foreach (var pokemon in Pokemons)
             {
-                clbIgnore.Items.Add(pokemon);
+                clbCatchIgnore.Items.Add(pokemon);
                 clbTransfer.Items.Add(pokemon);
                 clbPowerUp.Items.Add(pokemon);
                 clbEvolve.Items.Add(pokemon);
                 clbSnipePokemonFilter.Items.Add(pokemon);
+            }
+
+            var zones = new TimeZoneIds().GetTimeZoneIds();
+            foreach (var tz in zones)
+            {
+                cbTimeZone.Items.Add(tz.Key);
+            }
+
+            cbTimeZone.Text = settings.Auth.CurrentAuthConfig.TimeZone;
+
+            var logicSettings = new LogicSettings(settings);
+            accountManager = new MultiAccountManager(settings, logicSettings.Bots);
+
+            if (accountManager.Accounts.Count > 1)
+            {
+                var i = 0;
+                lvAccounts.Enabled = true;
+                foreach (var acc in accountManager.Accounts.OrderByDescending(p => p.Level).ThenByDescending(p => p.CurrentXp))
+                {
+                    lvAccounts.Items.Add($"{acc.AuthType}");
+                    lvAccounts.Items[i].SubItems.Add($"{acc.Username}");
+                    lvAccounts.Items[i].SubItems.Add($"{acc.Nickname}");
+                    lvAccounts.Items[i].Checked = acc.AccountActive;
+                    i += 1;
+                }
+                //lvAccounts.Items[0].Remove();
+            }
+            else
+            {
+                lvAccounts.Enabled = false;
             }
 
             StreamReader auth = new StreamReader(AuthFilePath);
@@ -67,11 +103,10 @@ namespace RocketBot2.Forms
             var  languageIndex = languageList.IndexOf(_settings.ConsoleConfig.TranslationLanguageCode);
             cbLanguage.DataSource = languageList;
             cbLanguage.SelectedIndex = languageIndex == -1 ? 0 : languageIndex;
-            
+
             #endregion
 
             #region Login Type and info
-
             authTypeCb.Text = _settings.Auth.CurrentAuthConfig.AuthType.ToString();
             UserLoginBox.Text = _settings.Auth.CurrentAuthConfig.Username; 
             UserPasswordBox.Text = _settings.Auth.CurrentAuthConfig.Password;
@@ -87,9 +122,13 @@ namespace RocketBot2.Forms
 
             //apiconfig
             cbUsePogoDevAPI.Checked = _settings.Auth.APIConfig.UsePogoDevAPI;
+            cbUseCustomAPI.Checked = _settings.Auth.APIConfig.UseCustomAPI;
+            tbHashURL.Text = _settings.Auth.APIConfig.UrlHashServices;
             tbAuthAPIKey.Text = _settings.Auth.APIConfig.AuthAPIKey;
-            cbUseLegacyAPI.Checked = _settings.Auth.APIConfig.UseLegacyAPI;
             cbDiplayHashServerLog.Checked = _settings.Auth.APIConfig.DiplayHashServerLog;
+
+            cbEnablePushBulletNotification.Checked = _settings.NotificationConfig.EnablePushBulletNotification;
+            tbPushBulletAPIKey.Text = _settings.NotificationConfig.PushBulletApiKey;
 
             #endregion
 
@@ -102,7 +141,7 @@ namespace RocketBot2.Forms
             //not use proxy
             GMapProvider.WebProxy = null;
             //center map on moscow
-            gMapCtrl.Position = new PointLatLng(_settings.LocationConfig.DefaultLatitude, _settings.LocationConfig.DefaultLongitude);
+            gMapCtrl.Position = new PointLatLng(_session.Client.CurrentLatitude, _session.Client.CurrentLongitude);
             //zoom min/max; default both = 2
             gMapCtrl.DragButton = MouseButtons.Left;
             gMapCtrl.CenterPen = new Pen(Color.Red, 2);
@@ -135,7 +174,6 @@ namespace RocketBot2.Forms
             FirmwareTagsTb.Text = _settings.Auth.DeviceConfig.FirmwareTags;
             FirmwareTypeTb.Text = _settings.Auth.DeviceConfig.FirmwareType;
             FirmwareFingerprintTb.Text = _settings.Auth.DeviceConfig.FirmwareFingerprint;
-            deviceTypeCb.SelectedIndex = _settings.Auth.DeviceConfig.DeviceBrand.ToLower() == "apple" ? 0 : 1;
 
             #endregion
 
@@ -144,10 +182,10 @@ namespace RocketBot2.Forms
             #region Catch
 
             cbCatchPoke.Checked = _settings.PokemonConfig.CatchPokemon;
+            gbCatchPokemon.Enabled = cbCatchPoke.Checked;
             cbUseEggIncubators.Checked = _settings.PokemonConfig.UseEggIncubators;
             cbUseLimitedEggIncubators.Checked = _settings.PokemonConfig.UseLimitedEggIncubators;
             cbAutoFavoriteShinyOnCatch.Checked = _settings.PokemonConfig.AutoFavoriteShinyOnCatch;
-
 
             tbMaxPokeballsPerPokemon.Text = _settings.PokemonConfig.MaxPokeballsPerPokemon.ToString();
             cbAutoFavoritePokemon.Checked = _settings.PokemonConfig.AutoFavoritePokemon;
@@ -173,13 +211,15 @@ namespace RocketBot2.Forms
 
             foreach (var poke in _settings.PokemonsToIgnore)
             {
-                clbIgnore.SetItemChecked(clbIgnore.FindStringExact(poke.ToString()), true);
+                clbCatchIgnore.SetItemChecked(clbCatchIgnore.FindStringExact(poke.ToString()), true);
             }
 
             foreach (var poke in _settings.SnipePokemonFilter)
             {
                 clbSnipePokemonFilter.SetItemChecked(clbSnipePokemonFilter.FindStringExact(poke.Key.ToString()), true);
             }
+            gbCatchIgnore.Text = $"Ignore({clbCatchIgnore.CheckedItems.Count}/{clbCatchIgnore.Items.Count})";
+            gbSnipe.Text = $"Snipe({clbSnipePokemonFilter.CheckedItems.Count}/{clbSnipePokemonFilter.Items.Count})";
 
             #endregion
 
@@ -196,10 +236,13 @@ namespace RocketBot2.Forms
 
             tbKeepMinDuplicatePokemon.Text = _settings.PokemonConfig.KeepMinDuplicatePokemon.ToString();
             cbUseKeepMinLvl.Checked = _settings.PokemonConfig.UseKeepMinLvl;
+            cbKeepPokemonsToBeEvolved.Checked = _settings.PokemonConfig.KeepPokemonsToBeEvolved;
+
             foreach (var poke in _settings.PokemonsNotToTransfer)
             {
                 clbTransfer.SetItemChecked(clbTransfer.FindStringExact(poke.ToString()), true);
             }
+            gbExcludeTrans.Text = $"Exclude({clbTransfer.CheckedItems.Count}/{clbTransfer.Items.Count})";
 
             #endregion
 
@@ -219,6 +262,7 @@ namespace RocketBot2.Forms
             {
                 clbPowerUp.SetItemChecked(clbPowerUp.FindStringExact(poke.ToString()), true);
             }
+            gbPUP.Text = $"Power Up({clbPowerUp.CheckedItems.Count}/{clbPowerUp.Items.Count})";
             if (_settings.PokemonConfig.LevelUpByCPorIv == "iv")
             {
                 label31.Visible = true;
@@ -238,19 +282,28 @@ namespace RocketBot2.Forms
 
             #region Evo
 
-            cbEvoAllAboveIV.Checked = _settings.PokemonConfig.EvolveAllPokemonAboveIv;
-            tbEvoAboveIV.Text = _settings.PokemonConfig.EvolveAboveIvValue.ToString(CultureInfo.InvariantCulture);
-            cbEvolveAllPokemonWithEnoughCandy.Checked = _settings.PokemonConfig.EvolveAllPokemonWithEnoughCandy;
-            cbKeepPokemonsThatCanEvolve.Checked = _settings.PokemonConfig.KeepPokemonsThatCanEvolve;
-            tbEvolveKeptPokemonsAtStorageUsagePercentage.Text =
-                _settings.PokemonConfig.EvolveKeptPokemonsAtStorageUsagePercentage.ToString(CultureInfo.InvariantCulture);
-            cbUseLuckyEggsWhileEvolving.Checked = _settings.PokemonConfig.UseLuckyEggsWhileEvolving;
-            tbUseLuckyEggsMinPokemonAmount.Text = _settings.PokemonConfig.UseLuckyEggsMinPokemonAmount.ToString();
+            cbEvolvePokemonsThatMatchFilter.Checked = _settings.PokemonConfig.EvolveConfig.EvolvePokemonsThatMatchFilter;
+            cbEvolveAnyPokemonAboveIv.Checked = _settings.PokemonConfig.EvolveConfig.EvolveAnyPokemonAboveIv;
+            tbEvolveAnyPokemonAboveIvValue.Text = _settings.PokemonConfig.EvolveConfig.EvolveAnyPokemonAboveIvValue.ToString(CultureInfo.InvariantCulture);
+
+            cbTriggerEvolveAsSoonAsFilterIsMatched.Checked = _settings.PokemonConfig.EvolveConfig.TriggerAsSoonAsFilterIsMatched;
+            cbTriggerEvolveOnEvolutionCount.Checked = _settings.PokemonConfig.EvolveConfig.TriggerOnEvolutionCount;
+            tbTriggerEvolveOnEvolutionCountValue.Text = _settings.PokemonConfig.EvolveConfig.TriggerOnEvolutionCountValue.ToString();
+            cbTriggerEvolveOnStorageUsagePercentage.Checked = _settings.PokemonConfig.EvolveConfig.TriggerOnStorageUsagePercentage;
+            tbTriggerEvolveOnStorageUsagePercentageValue.Text = _settings.PokemonConfig.EvolveConfig.TriggerOnStorageUsagePercentageValue.ToString(CultureInfo.InvariantCulture);
+            cbTriggerEvolveOnStorageUsageAbsolute.Checked = _settings.PokemonConfig.EvolveConfig.TriggerOnStorageUsageAbsolute;
+            tbTriggerEvolveOnStorageUsageAbsoluteValue.Text = _settings.PokemonConfig.EvolveConfig.TriggerOnStorageUsageAbsoluteValue.ToString();
+            cbTriggerEvolveIfLuckyEggIsActive.Checked = _settings.PokemonConfig.EvolveConfig.TriggerIfLuckyEggIsActive;
+
+            cbEvolvePreserveMinCandiesFromFilter.Checked = _settings.PokemonConfig.EvolveConfig.PreserveMinCandiesFromFilter;
+            cbEvolveApplyLuckyEggOnEvolutionCount.Checked = _settings.PokemonConfig.EvolveConfig.ApplyLuckyEggOnEvolutionCount;
+            tbEvolveApplyLuckyEggOnEvolutionCountValue.Text = _settings.PokemonConfig.EvolveConfig.ApplyLuckyEggOnEvolutionCountValue.ToString();
             
             foreach (var poke in _settings.PokemonEvolveFilter)
             {
                 clbEvolve.SetItemChecked(clbEvolve.FindStringExact(poke.Key.ToString()), true);
             }
+            gbEvolve.Text = $"Evolve Filter List ({clbEvolve.CheckedItems.Count}/{clbEvolve.Items.Count})";
 
             #endregion
 
@@ -295,12 +348,41 @@ namespace RocketBot2.Forms
             tbDataServiceIdentification.Text = _settings.DataSharingConfig.DataServiceIdentification;
             cbEnableSyncData.Checked = _settings.DataSharingConfig.EnableSyncData;
             cbEnableGyms.Checked = _settings.GymConfig.Enable;
-            cBoxTeaamColor.Text = _settings.GymConfig.DefaultTeam;
+            cBoxTeamColor.Text = _settings.GymConfig.DefaultTeam;
             cbUseHumanlikeDelays.Checked = _settings.HumanlikeDelays.UseHumanlikeDelays;
+            cbAutoWalkAI.Checked = _settings.PlayerConfig.AutoWalkAI;
+            tbAutoWalkKM.Text = _settings.PlayerConfig.AutoWalkDist.ToString();
+
+            tbRuntimeSwitch.Text = _settings.MultipleBotConfig.RuntimeSwitch.ToString();
+            tbRuntimeSwitchRandomTime.Text = _settings.MultipleBotConfig.RuntimeSwitchRandomTime.ToString();
+            tbOnLimitPauseTimes.Text = _settings.MultipleBotConfig.OnLimitPauseTimes.ToString();
+            cbOnRarePokemon.Checked = _settings.MultipleBotConfig.OnRarePokemon;
+            tbMinIVToSwitch.Text = _settings.MultipleBotConfig.MinIVToSwitch.ToString();
+            tbEXPSwitch.Text = _settings.MultipleBotConfig.EXPSwitch.ToString();
+            tbPokestopSwitch.Text = _settings.MultipleBotConfig.PokestopSwitch.ToString();
+            tbPokemonSwitch.Text = _settings.MultipleBotConfig.PokemonSwitch.ToString();
+            tbPokemonPerHourSwitch.Text = _settings.MultipleBotConfig.PokemonPerHourSwitch.ToString();
+            cbStartFromDefaultLocation.Checked = _settings.MultipleBotConfig.StartFromDefaultLocation;
+            tbPokestopSoftbanCount.Text = _settings.MultipleBotConfig.PokestopSoftbanCount.ToString();
+            cbDisplayList.Checked = _settings.MultipleBotConfig.DisplayList;
+            cbSelectAccountOnStartUp.Checked = _settings.MultipleBotConfig.SelectAccountOnStartUp;
+            tbCatchFleeCount.Text = _settings.MultipleBotConfig.CatchFleeCount.ToString();
+            cbSwitchOnCatchLimit.Checked = _settings.MultipleBotConfig.SwitchOnCatchLimit;
+            cbSwitchOnPokestopLimit.Checked = _settings.MultipleBotConfig.SwitchOnPokestopLimit;
         }
-            #endregion
+        #endregion
 
         #region Help button for API key
+
+        private void cbUseEggIncubators_CheckedChanged(object sender, EventArgs e)
+        {
+            cbUseLimitedEggIncubators.Enabled = cbUseEggIncubators.Checked;
+        }
+
+        private void cbCatchPoke_CheckedChanged(object sender, EventArgs e)
+        {
+            gbCatchPokemon.Enabled = cbCatchPoke.Checked;
+        }
 
         protected override void OnLoad(EventArgs e)
         {
@@ -338,12 +420,17 @@ namespace RocketBot2.Forms
 
         private static Dictionary<PokemonId, EvolveFilter> EvolveFilterConvertClbDictionary(CheckedListBox input)
         {
+            var existingFilters = _settings.PokemonEvolveFilter;
             var x = input.CheckedItems.Cast<PokemonId>().ToList();
             var results = new Dictionary<PokemonId, EvolveFilter>();
             foreach (var i in x)
             {
-                var y = new EvolveFilter();
-                results.Add(i, y);
+                bool exists = existingFilters.TryGetValue(i, out var filter);
+                if(!exists)
+                {
+                    filter = new EvolveFilter();
+                }
+                results.Add(i, filter);
             }
             return results;
         }
@@ -429,29 +516,22 @@ namespace RocketBot2.Forms
             }
         }
 
-        private void PopulateDevice(int tabIndex = -1)
-        {
-            deviceTypeCb.SelectedIndex = tabIndex == -1 ? _deviceHelper.GetRandomIndex(2) : tabIndex;
-            var candidateDevices = deviceTypeCb.SelectedIndex == 0
-                ? _deviceInfos.Where(d => d.DeviceBrand.ToLower() == "apple").ToList()
-                : _deviceInfos.Where(d => d.DeviceBrand.ToLower() != "apple").ToList();
-            var selectIndex = _deviceHelper.GetRandomIndex(candidateDevices.Count);
-
-            DeviceIdTb.Text = candidateDevices[selectIndex].DeviceId == "8525f5d8201f78b5"
-                ? _deviceHelper.RandomString(16, "0123456789abcdef")
-                : candidateDevices[selectIndex].DeviceId;
-            AndroidBoardNameTb.Text = candidateDevices[selectIndex].AndroidBoardName;
-            AndroidBootloaderTb.Text = candidateDevices[selectIndex].AndroidBootloader;
-            DeviceBrandTb.Text = candidateDevices[selectIndex].DeviceBrand;
-            DeviceModelTb.Text = candidateDevices[selectIndex].DeviceModel;
-            DeviceModelIdentifierTb.Text = candidateDevices[selectIndex].DeviceModelIdentifier;
-            DeviceModelBootTb.Text = candidateDevices[selectIndex].DeviceModelBoot;
-            HardwareManufacturerTb.Text = candidateDevices[selectIndex].HardwareManufacturer;
-            HardwareModelTb.Text = candidateDevices[selectIndex].HardwareModel;
-            FirmwareBrandTb.Text = candidateDevices[selectIndex].FirmwareBrand;
-            FirmwareTagsTb.Text = candidateDevices[selectIndex].FirmwareTags;
-            FirmwareTypeTb.Text = candidateDevices[selectIndex].FirmwareType;
-            FirmwareFingerprintTb.Text = candidateDevices[selectIndex].FirmwareFingerprint;
+        private void PopulateDevice()
+        { 
+            var device = DeviceInfoHelper.GetRandomIosDevice();
+            DeviceIdTb.Text = device.DeviceId;
+            AndroidBoardNameTb.Text = device.AndroidBoardName;
+            AndroidBootloaderTb.Text = device.AndroidBootloader;
+            DeviceBrandTb.Text = device.DeviceBrand;
+            DeviceModelTb.Text = device.DeviceModel;
+            DeviceModelIdentifierTb.Text = device.DeviceModelIdentifier;
+            DeviceModelBootTb.Text = device.DeviceModelBoot;
+            HardwareManufacturerTb.Text = device.HardwareManufacturer;
+            HardwareModelTb.Text = device.HardwareModel;
+            FirmwareBrandTb.Text = device.FirmwareBrand;
+            FirmwareTagsTb.Text = device.FirmwareTags;
+            FirmwareTypeTb.Text = device.FirmwareType;
+            FirmwareFingerprintTb.Text = device.FirmwareFingerprint;
         }
 
         private static void ListSelectAllHandler(CheckedListBox targetList, bool setToValue)
@@ -465,6 +545,18 @@ namespace RocketBot2.Forms
         #endregion
 
         #region Events
+
+        public void ReInitializeSession(ISession session, GlobalSettings globalSettings, Account requestedAccount = null)
+        {
+            if (session.LogicSettings.MultipleBotConfig.StartFromDefaultLocation)
+            {
+                session.ReInitSessionWithNextBot(requestedAccount, globalSettings.LocationConfig.DefaultLatitude, globalSettings.LocationConfig.DefaultLongitude, session.Client.CurrentAltitude);
+            }
+            else
+            {
+                session.ReInitSessionWithNextBot(); //current location
+            }
+        }
 
         private void SaveBtn_Click(object sender, EventArgs e)
         {
@@ -484,6 +576,14 @@ namespace RocketBot2.Forms
                 {
                     File.Delete(lastPosFile);
                 }
+
+                //TimeZones for current Player
+                var x = new TimeZoneIds().GetTimeZoneIds();
+                _settings.Auth.CurrentAuthConfig.TimeZone = cbTimeZone.Text;
+                _settings.Auth.CurrentAuthConfig.Country = x[cbTimeZone.Text].Item1;
+                _settings.Auth.CurrentAuthConfig.Language = x[cbTimeZone.Text].Item2;
+                _settings.Auth.CurrentAuthConfig.POSIX = x[cbTimeZone.Text].Item3;
+                //
                 _settings.Auth.CurrentAuthConfig.AuthType = authTypeCb.Text == @"Google" ? AuthType.Google : AuthType.Ptc;
                 _settings.Auth.CurrentAuthConfig.Username = UserLoginBox.Text;
                 _settings.Auth.CurrentAuthConfig.Password = UserPasswordBox.Text;
@@ -506,15 +606,40 @@ namespace RocketBot2.Forms
                 _settings.Auth.DeviceConfig.HardwareModel = HardwareModelTb.Text == "" ? null : HardwareModelTb.Text;
                 _settings.Auth.DeviceConfig.FirmwareBrand = FirmwareBrandTb.Text == "" ? null : FirmwareBrandTb.Text;
                 _settings.Auth.DeviceConfig.FirmwareTags = FirmwareTagsTb.Text == "" ? null : FirmwareTagsTb.Text;
-                _settings.Auth.DeviceConfig.FirmwareType = FirmwareTypeTb.Text == "" ? null: FirmwareTypeTb.Text;
+                _settings.Auth.DeviceConfig.FirmwareType = FirmwareTypeTb.Text == "" ? null : FirmwareTypeTb.Text;
                 _settings.Auth.DeviceConfig.FirmwareFingerprint = FirmwareFingerprintTb.Text == "" ? null : FirmwareFingerprintTb.Text;
                 _settings.ConsoleConfig.TranslationLanguageCode = cbLanguage.Text;
                 _settings.Auth.APIConfig.UsePogoDevAPI = cbUsePogoDevAPI.Checked;
+                _settings.Auth.APIConfig.UseCustomAPI = cbUseCustomAPI.Checked;
                 _settings.Auth.APIConfig.AuthAPIKey = tbAuthAPIKey.Text;
-                _settings.Auth.APIConfig.UseLegacyAPI = cbUseLegacyAPI.Checked;
+                _settings.Auth.APIConfig.UrlHashServices = tbHashURL.Text;
                 _settings.Auth.APIConfig.DiplayHashServerLog = cbDiplayHashServerLog.Checked;
+
+                bool Changed = false;
+                foreach (var acc in accountManager.Accounts.OrderByDescending(p => p.Level).ThenByDescending(p => p.CurrentXp))
+                {
+                    acc.RuntimeTotal = 0; acc.ReleaseBlockTime = 0; acc.LastRuntimeUpdatedAt = null;
+
+                    for (int i = 0; i < lvAccounts.Items.Count; i++)
+                    {
+                        if (acc.Username == lvAccounts.Items[i].SubItems[1].Text)
+                        {
+                            if (acc.AccountActive != lvAccounts.Items[i].Checked) Changed = true;
+                            acc.AccountActive = lvAccounts.Items[i].Checked;
+                            _settings.Auth.Bots[i].AccountActive = lvAccounts.Items[i].Checked;
+                        }
+                    }
+                    _context.SaveChanges();
+                }
+
                 _settings.Auth.Save(AuthFilePath);
-                
+
+                if (Changed)
+                {
+                    var bot = accountManager.GetStartUpAccount();
+                    _session.ReInitSessionWithNextBot(bot);
+                }
+
                 #endregion
 
                 #region RocketBot2.Form Settings
@@ -536,7 +661,7 @@ namespace RocketBot2.Forms
                 _settings.PokemonConfig.CatchPokemon = cbCatchPoke.Checked;
                 _settings.PokemonConfig.UseEggIncubators = cbUseEggIncubators.Checked;
                 _settings.PokemonConfig.MaxPokeballsPerPokemon = Convert.ToInt32(tbMaxPokeballsPerPokemon.Text);
-                _settings.PokemonsToIgnore = ConvertClbToList(clbIgnore);
+                _settings.PokemonsToIgnore = ConvertClbToList(clbCatchIgnore);
                 _settings.PokemonConfig.AutoFavoritePokemon = cbAutoFavoritePokemon.Checked;
                 _settings.PokemonConfig.FavoriteMinIvPercentage = ConvertStringToFloat(tbFavoriteMinIvPercentage.Text);
 
@@ -576,6 +701,7 @@ namespace RocketBot2.Forms
 
                 _settings.PokemonConfig.KeepMinDuplicatePokemon = Convert.ToInt32(tbKeepMinDuplicatePokemon.Text);
                 _settings.PokemonConfig.UseKeepMinLvl = cbUseKeepMinLvl.Checked;
+                _settings.PokemonConfig.KeepPokemonsToBeEvolved = cbKeepPokemonsToBeEvolved.Checked;
                 _settings.PokemonsNotToTransfer = ConvertClbToList(clbTransfer);
 
                 #endregion
@@ -597,14 +723,23 @@ namespace RocketBot2.Forms
 
                 #region Evo
 
-                _settings.PokemonConfig.EvolveAllPokemonAboveIv = cbEvoAllAboveIV.Checked;
-                _settings.PokemonConfig.EvolveAboveIvValue = ConvertStringToFloat(tbEvoAboveIV.Text);
-                _settings.PokemonConfig.EvolveAllPokemonWithEnoughCandy = cbEvolveAllPokemonWithEnoughCandy.Checked;
-                _settings.PokemonConfig.KeepPokemonsThatCanEvolve = cbKeepPokemonsThatCanEvolve.Checked;
-                _settings.PokemonConfig.UseLuckyEggsWhileEvolving = cbUseLuckyEggsWhileEvolving.Checked;
-                _settings.PokemonConfig.EvolveKeptPokemonsAtStorageUsagePercentage =
-                    Convert.ToDouble(tbEvolveKeptPokemonsAtStorageUsagePercentage.Text);
-                _settings.PokemonConfig.UseLuckyEggsMinPokemonAmount = Convert.ToInt32(tbUseLuckyEggsMinPokemonAmount.Text);
+                _settings.PokemonConfig.EvolveConfig.EvolvePokemonsThatMatchFilter = cbEvolvePokemonsThatMatchFilter.Checked;
+                _settings.PokemonConfig.EvolveConfig.EvolveAnyPokemonAboveIv = cbEvolveAnyPokemonAboveIv.Checked;
+                _settings.PokemonConfig.EvolveConfig.EvolveAnyPokemonAboveIvValue= ConvertStringToFloat(tbEvolveAnyPokemonAboveIvValue.Text);
+
+                _settings.PokemonConfig.EvolveConfig.TriggerAsSoonAsFilterIsMatched = cbTriggerEvolveAsSoonAsFilterIsMatched.Checked;
+                _settings.PokemonConfig.EvolveConfig.TriggerOnEvolutionCount = cbTriggerEvolveOnEvolutionCount.Checked;
+                _settings.PokemonConfig.EvolveConfig.TriggerOnEvolutionCountValue = Convert.ToInt32(tbTriggerEvolveOnEvolutionCountValue.Text);
+                _settings.PokemonConfig.EvolveConfig.TriggerOnStorageUsagePercentage = cbTriggerEvolveOnStorageUsagePercentage.Checked;
+                _settings.PokemonConfig.EvolveConfig.TriggerOnStorageUsagePercentageValue = Convert.ToDouble(tbTriggerEvolveOnStorageUsagePercentageValue.Text);
+                _settings.PokemonConfig.EvolveConfig.TriggerOnStorageUsageAbsolute = cbTriggerEvolveOnStorageUsageAbsolute.Checked;
+                _settings.PokemonConfig.EvolveConfig.TriggerOnStorageUsageAbsoluteValue = Convert.ToInt32(tbTriggerEvolveOnStorageUsageAbsoluteValue.Text);
+                _settings.PokemonConfig.EvolveConfig.TriggerIfLuckyEggIsActive = cbTriggerEvolveIfLuckyEggIsActive.Checked;
+
+                _settings.PokemonConfig.EvolveConfig.PreserveMinCandiesFromFilter = cbEvolvePreserveMinCandiesFromFilter.Checked;
+                _settings.PokemonConfig.EvolveConfig.ApplyLuckyEggOnEvolutionCount = cbEvolveApplyLuckyEggOnEvolutionCount.Checked;
+                _settings.PokemonConfig.EvolveConfig.ApplyLuckyEggOnEvolutionCountValue = Convert.ToInt32(tbEvolveApplyLuckyEggOnEvolutionCountValue.Text);
+
                 _settings.PokemonEvolveFilter = EvolveFilterConvertClbDictionary(clbEvolve);
 
                 #endregion
@@ -647,11 +782,34 @@ namespace RocketBot2.Forms
                 _settings.CustomCatchConfig.ForceGreatThrowOverCp = Convert.ToInt32(tbForceGreatThrowOverCp.Text);
                 _settings.CustomCatchConfig.ForceExcellentThrowOverCp = Convert.ToInt32(tbForceExcellentThrowOverCp.Text);
                 _settings.GymConfig.Enable = cbEnableGyms.Checked;
-                _settings.GymConfig.DefaultTeam = cBoxTeaamColor.Text;
+                _settings.GymConfig.DefaultTeam = cBoxTeamColor.Text;
                 _settings.DataSharingConfig.AutoSnipe = cbAutoSniper.Checked;
                 _settings.DataSharingConfig.DataServiceIdentification = tbDataServiceIdentification.Text;
                 _settings.DataSharingConfig.EnableSyncData = cbEnableSyncData.Checked;
                 _settings.HumanlikeDelays.UseHumanlikeDelays = cbUseHumanlikeDelays.Checked;
+                _settings.PlayerConfig.AutoWalkAI = cbAutoWalkAI.Checked;
+                _settings.PlayerConfig.AutoWalkDist = Convert.ToInt32(tbAutoWalkKM.Text);
+
+                //Settings added by TheWizard
+                _settings.NotificationConfig.EnablePushBulletNotification = cbEnablePushBulletNotification.Checked;
+                _settings.NotificationConfig.PushBulletApiKey = tbPushBulletAPIKey.Text;
+
+                _settings.MultipleBotConfig.RuntimeSwitch = Convert.ToInt32(tbRuntimeSwitch.Text);
+                _settings.MultipleBotConfig.RuntimeSwitchRandomTime = Convert.ToInt32(tbRuntimeSwitchRandomTime.Text);
+                _settings.MultipleBotConfig.OnLimitPauseTimes = Convert.ToInt32(tbOnLimitPauseTimes.Text);
+                _settings.MultipleBotConfig.OnRarePokemon = cbOnRarePokemon.Checked;
+                _settings.MultipleBotConfig.MinIVToSwitch = Convert.ToInt32(tbMinIVToSwitch.Text);
+                _settings.MultipleBotConfig.EXPSwitch = Convert.ToInt32(tbEXPSwitch.Text);
+                _settings.MultipleBotConfig.PokestopSwitch = Convert.ToInt32(tbPokestopSwitch.Text);
+                _settings.MultipleBotConfig.PokemonSwitch = Convert.ToInt32(tbPokemonSwitch.Text);
+                _settings.MultipleBotConfig.PokemonPerHourSwitch = Convert.ToInt32(tbPokemonPerHourSwitch.Text);
+                _settings.MultipleBotConfig.StartFromDefaultLocation = cbStartFromDefaultLocation.Checked;
+                _settings.MultipleBotConfig.PokestopSoftbanCount = Convert.ToInt32(tbPokestopSoftbanCount.Text);
+                _settings.MultipleBotConfig.DisplayList = cbDisplayList.Checked;
+                _settings.MultipleBotConfig.SelectAccountOnStartUp = cbSelectAccountOnStartUp.Checked;
+                _settings.MultipleBotConfig.CatchFleeCount = Convert.ToInt32(tbCatchFleeCount.Text);
+                _settings.MultipleBotConfig.SwitchOnCatchLimit = cbSwitchOnCatchLimit.Checked;
+                _settings.MultipleBotConfig.SwitchOnPokestopLimit = cbSwitchOnPokestopLimit.Checked;
 
                 #endregion
 
@@ -742,7 +900,7 @@ namespace RocketBot2.Forms
 
         private void RandomIDBtn_Click(object sender, EventArgs e)
         {
-            DeviceIdTb.Text = _deviceHelper.RandomString(16, "0123456789abcdef");
+            DeviceIdTb.Text = DeviceInfoHelper.GetRandomIosDevice().DeviceId;
         }
 
         private void RandomDeviceBtn_Click(object sender, EventArgs e)
@@ -758,11 +916,6 @@ namespace RocketBot2.Forms
         private void UseProxyAuthCb_CheckedChanged(object sender, EventArgs e)
         {
             ToggleProxyCtrls();
-        }
-
-        private void DeviceTypeCb_SelectionChangeCommitted(object sender, EventArgs e)
-        {
-            PopulateDevice(deviceTypeCb.SelectedIndex);
         }
 
         private void CbPowerUpAll_CheckedChanged(object sender, EventArgs e)
@@ -800,7 +953,7 @@ namespace RocketBot2.Forms
 
         private void CbSelectAllCatch_CheckedChanged(object sender, EventArgs e)
         {
-            ListSelectAllHandler(clbIgnore, cbIgnoreAll.Checked);
+            ListSelectAllHandler(clbCatchIgnore, cbIgnoreAll.Checked);
         }
 
         private void CbSelectAllTransfer_CheckedChanged(object sender, EventArgs e)
@@ -810,18 +963,33 @@ namespace RocketBot2.Forms
 
         private void CbUsePogoDevAPI_CheckedChanged(object sender, EventArgs e)
         {
-            cbUseLegacyAPI.Checked = !cbUsePogoDevAPI.Checked;
+            cbUseCustomAPI.Checked = !cbUsePogoDevAPI.Checked;
         }
 
         private void CbUseLegacyAPI_CheckedChanged(object sender, EventArgs e)
         {
-            cbUsePogoDevAPI.Checked = !cbUseLegacyAPI.Checked;
+            cbUsePogoDevAPI.Checked = !cbUseCustomAPI.Checked;
         }
 
         private void SettingsForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             gMapCtrl.Dispose();
         }
+
+        private void CbEnablePushBulletNotification_CheckedChanged(object sender, EventArgs e)
+        {
+            _settings.NotificationConfig.EnablePushBulletNotification = cbEnablePushBulletNotification.Checked;
+        }
+
+        private void cbSwitchOnCatchLimit_CheckedChanged(object sender, EventArgs e)
+        {
+            tbPokemonSwitch.Enabled = cbSwitchOnCatchLimit.Checked;
+        }
+
+        private void cbSwitchOnPokestopLimit_CheckedChanged(object sender, EventArgs e)
+        {
+            tbPokestopSwitch.Enabled = cbSwitchOnPokestopLimit.Checked;
+        }
         #endregion
-    }       
+    }
 }

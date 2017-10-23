@@ -78,7 +78,7 @@
     },
     {
       "Key": "eventFortUsed",
-      "Value": "<{0}> XP:{1}, Gems:{2}, Items:{3}, Широта:{4}, Долгота:{5}"
+      "Value": "Name: {0} | XP: {1} | Gems: {2} | Items: {3} | Badges: {4} | BonusLoot: {5} | RaidTickets: {6} | TeamBonusLoot: {7} | PokemonEgg: {8} (Eggs: {9}) | Lat: {10} Long: {11} | Alt: {12}"
     },
     {
       "Key": "eventFortFailed",
@@ -94,7 +94,7 @@
     },
     {
       "Key": "eventFortTargeted",
-      "Value": "{0} Направляемся к <{1}>, дистанция ({2}м) ({3} сек.) (route {4})"
+      "Value":  "Traveling {0}m({1} sec) via'{2}' to next {3}: {4}"
     },
     {
       "Key": "eventProfileLogin",
@@ -125,11 +125,11 @@
     },
     {
       "Key": "eventPokemonCaptureSuccess",
-      "Value": "=>({0})({1}) {2} {3}-УР (CР:{4}/{5}|IV:{6}%) c {7}% шансом на {8}м исп. {9} ({10} осталось). | {11} EXP получено | {12} | широта: {13} долгота: {14} | Move1: {15} Move2: {16}"
+      "Value": "({0}) | ({1}) {2} | Lvl: {3} | CP: {4}/{5} | IV: {6}% | Chance: {7}% | {8}m dist | with a {9} ({10} left) | XP: {11} | SD: {12} | {13} | lat: {14} long: {15} | Move1: {16} Move2: {17} | Rarity: {18} | Capture Reason: {19} | Shiny: {20} | Form: {21} | Costume: {22} | Sex: {23}"
     },
     {
       "Key": "eventPokemonCaptureFailed",
-      "Value": "=>({0})({1}) {2} {3}-УР (CР:{4}/{5}|IV:{6}%) c {7}% шансом на {8}м исп. {9} ({10} осталось). | широта: {11} долгота: {12} | Move1: {13} Move2: {14}"
+      "Value": "({0}) | ({1}) {2} | Lvl: {3} | CP: {4}/{5} | IV: {6}% | Chance: {7}% | {8}m dist | with a {9} ({10} left) | XP: {11} | lat: {12} long: {13} | Move1: {14} Move2: {15} | Rarity :{16}"
     },
     {
       "Key": "eventNoPokeballs",
@@ -138,6 +138,10 @@
     {
       "Key": "waitingForMorePokemonToEvolve",
       "Value": "Улучшения ждут {0} покемонов, собираем {1} оставшихся. ({2}/{3} на {4}% сумки)"
+    },
+	{
+      "Key": "WaitingForMoreEvolutionsToEvolve",
+      "Value": "Waiting for {0} more evolutions to start evolving! (Possible: {1} | Needed: {2})"
     },
     {
       "Key": "useLuckyEggsMinPokemonAmountTooHigh",
@@ -373,23 +377,23 @@
     },
     {
       "Key": "currentPokeballInv",
-      "Value": "Pokeballs: {0} | Greatballs: {1} | Ultraballs: {2} | Masterballs: {3}"
+      "Value": "Pokeballs: {0} | Greatballs:   {1} | Ultraballs:   {2} | Masterballs:  {3}"
     },
     {
       "Key": "CurrentPotionInv",
-      "Value": "Potions: {0} | SuperPotions: {1} | HyperPotions: {2} | MaxPotions: {3}"
+      "Value": "Potions:   {0} | SuperPotions: {1} | HyperPotions: {2} | MaxPotions:   {3}"
     },
     {
       "Key": "CurrentReviveInv",
-      "Value": "Revives: {0} | MaxRevives: {1}"
+      "Value": "Revives:   {0} | MaxRevives:   {1} | Evolve Items: {2} | Raid Tickets: {3}"
     },
     {
       "Key": "CurrentMiscItemInv",
-      "Value": "Berrys: {0} | Incense: {1} | LuckyEggs: {2} | Lures: {3}"
+      "Value": "Berrys:    {0} | Incense:      {1} | LuckyEggs:    {2} | Lures:        {3}"
     },
     {
       "Key": "maxItemsCombinedOverMaxItemStorage",
-      "Value": "[Ошибка Конфигурации] Общее количество выбранных предметов (шары+зелья+возр.={0}) превышает максимальное значение рюкзака ({1})"
+      "Value": "[Ошибка Конфигурации] Общее количество выбранных предметов (шары+зелья+возр+Evolution.={0}) превышает максимальное значение рюкзака ({1})"
     },
     {
       "Key": "recyclingQuietly",
@@ -589,7 +593,7 @@
     },
     {
       "Key": "amountPkmSeenCaught",
-      "Value": "Покемонов изучено: {0}/251, Покемонов поймано: {1}/251"
+      "Value": "Покемонов изучено: {0}/{1}, Покемонов поймано: {2}/{3}"
     },
     {
       "Key": "pkmPotentialEvolveCount",

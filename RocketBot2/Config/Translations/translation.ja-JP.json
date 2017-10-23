@@ -78,7 +78,7 @@
     },
     {
       "Key": "eventFortUsed",
-      "Value": "名称: {0} 経験値: {1}, ジェム: {2}, アイテム: {3}, 経度: {4}, 緯度: {5}"
+      "Value": "Name: {0} | XP: {1} | Gems: {2} | Items: {3} | Badges: {4} | BonusLoot: {5} | RaidTickets: {6} | TeamBonusLoot: {7} | PokemonEgg: {8} (Eggs: {9}) | Lat: {10} Long: {11} | Alt: {12}"
     },
     {
       "Key": "eventFortFailed",
@@ -94,7 +94,7 @@
     },
     {
       "Key": "eventFortTargeted",
-      "Value": "次の{0}へ移動中です: {1} ({2}m) ({3} 秒) (route {4})"
+      "Value":  "Traveling {0}m({1} sec) via'{2}' to next {3}: {4}"
     },
     {
       "Key": "eventProfileLogin",
@@ -126,11 +126,11 @@
     },
     {
       "Key": "eventPokemonCaptureSuccess",
-      "Value": "({0}) | ({1}) {2} | Lvl: {3} CP: {4}/{5} IV: {6}% | 成功率: {7}% | 距離： {8}m | {9}を使用 (残り {10}) | {11} の経験値を獲得 | {12} | 緯度: {13} 経度: {14} | Move1: {15} Move2: {16}"
+      "Value": "({0}) | ({1}) {2} | Lvl: {3} | CP: {4}/{5} | IV: {6}% | Chance: {7}% | {8}m dist | with a {9} ({10} left) | XP: {11} | SD: {12} | {13} | lat: {14} long: {15} | Move1: {16} Move2: {17} | Rarity: {18} | Capture Reason: {19} | Shiny: {20} | Form: {21} | Costume: {22} | Sex: {23}"
     },
     {
       "Key": "eventPokemonCaptureFailed",
-      "Value": "{0}) | ({1}) {2} Lvl: {3} CP: {4}/{5} IV: {6}% | 成功率: {7}% | 距離：{8}m | {9}を使用 (残り {10}) | 緯度: {11} 経度: {12} | Move1: {13} Move2: {14}"
+      "Value": "({0}) | ({1}) {2} | Lvl: {3} | CP: {4}/{5} | IV: {6}% | Chance: {7}% | {8}m dist | with a {9} ({10} left) | XP: {11} | lat: {12} long: {13} | Move1: {14} Move2: {15} | Rarity :{16}"
     },
     {
       "Key": "eventNoPokeballs",
@@ -139,6 +139,10 @@
     {
       "Key": "waitingForMorePokemonToEvolve",
       "Value": "進化待機中： {0} Pokemon once {1} more are caught! ({2}/{3} for {4}% inventory)"
+    },
+	{
+      "Key": "WaitingForMoreEvolutionsToEvolve",
+      "Value": "Waiting for {0} more evolutions to start evolving! (Possible: {1} | Needed: {2})"
     },
     {
       "Key": "useLuckyEggsMinPokemonAmountTooHigh",
@@ -378,23 +382,23 @@
     },
     {
       "Key": "currentPokeballInv",
-      "Value": "手持ちのボール:  モンスターボール: {0} | スーパーボール: {1} | ハイパーボール: {2} | マスターボール: {3}"
+      "Value": "モンスターボール: {0} | スーパーボール:  {1} | ハイパーボール:  {2} | マスターボール:   {3}"
     },
     {
       "Key": "currentPotionInv",
-      "Value": "キズぐすり: {0} | いいキズぐすり: {1} | すごいキズぐすり: {2} | まんたんのくすり: {3}"
+      "Value": "キズぐすり:       {0} | いいキズぐすり: {1} | すごいキズぐすり: {2} | まんたんのくすり: {3}"
     },
     {
       "Key": "currentReviveInv",
-      "Value": "げんきのかけら: {0} | げんきのかたまり: {1}"
+      "Value": "Revives:         {0} | MaxRevives:    {1} | Evolve Items:    {2} | Raid Tickets:   {3}"
     },
     {
       "Key": "currentMiscItemInv",
-      "Value": "ズリのみ: {0} | おこう: {1} | しあわせタマゴ: {2} | ルアー: {3}"
+      "Value": "ズリのみ:         {0} | おこう:        {1} | しあわせタマゴ:    {2} | ルアー:         {3}"
     },
     {
       "Key": "maxItemsCombinedOverMaxItemStorage",
-      "Value": "[無効な設定] もちもの (ボール+キズぐすり+げんきのかけら等={0}) が所持数限界を超えています ({1})"
+      "Value": "[無効な設定] もちもの (ボール+キズぐすり+げんきのかけら等+Evolution={0}) が所持数限界を超えています ({1})"
     },
     {
       "Key": "recyclingQuietly",
@@ -594,7 +598,7 @@
     },
     {
       "Key": "amountPkmSeenCaught",
-      "Value": "見つけたポケモン: {0}/251　 捕まえたポケモン: {1}/251"
+      "Value": "見つけたポケモン: {0}/{1}　 捕まえたポケモン: {2}/{3}"
     },
     {
       "Key": "pkmPotentialEvolveCount",

@@ -32,6 +32,7 @@ namespace PoGo.NecroBot.Logic.Interfaces.Configuration
         int KeepMinLvl { get; }
         bool UseKeepMinLvl { get; }
         string KeepMinOperator { get; }
+        bool KeepPokemonsToBeEvolved { get; }
         double WalkingSpeedInKilometerPerHour { get; }
         bool UseWalkingSpeedVariant { get; }
         double WalkingSpeedVariant { get; }
@@ -40,9 +41,6 @@ namespace PoGo.NecroBot.Logic.Interfaces.Configuration
         bool FastSoftBanBypass { get; }
         int ByPassSpinCount { get; }
         double AutoSnipeMaxDistance { get; }
-        bool EvolveAllPokemonWithEnoughCandy { get; }
-        bool KeepPokemonsThatCanEvolve { get; }
-
         bool UseTransferFilterToCatch { get; }
         bool TransferDuplicatePokemon { get; }
         bool TransferDuplicatePokemonOnCapture { get; }
@@ -95,10 +93,22 @@ namespace PoGo.NecroBot.Logic.Interfaces.Configuration
         bool StartFromLastPosition { get; }
         bool UseGpxPathing { get; }
         string GpxFile { get; }
-        bool UseLuckyEggsWhileEvolving { get; }
-        int UseLuckyEggsMinPokemonAmount { get; }
-        bool EvolveAllPokemonAboveIv { get; }
-        float EvolveAboveIvValue { get; }
+        #region Evolve
+        bool EvolvePokemonsThatMatchFilter { get; }
+        bool EvolveAnyPokemonAboveIv { get; }
+        float EvolveAnyPokemonAboveIvValue { get; }
+        bool TriggerEvolveAsSoonAsFilterIsMatched { get; }
+        bool TriggerEvolveOnEvolutionCount { get; }
+        int TriggerEvolveOnEvolutionCountValue { get; }
+        bool TriggerEvolveOnStorageUsagePercentage { get; }
+        double TriggerEvolveOnStorageUsagePercentageValue { get; }
+        bool TriggerEvolveOnStorageUsageAbsolute { get; }
+        int TriggerEvolveOnStorageUsageAbsoluteValue { get; }
+        bool TriggerEvolveIfLuckyEggIsActive { get; }
+        bool EvolvePreserveMinCandiesFromFilter { get; }
+        bool EvolveApplyLuckyEggOnEvolutionCount { get; }
+        int EvolveApplyLuckyEggOnEvolutionCountValue { get; }
+        #endregion
         bool DumpPokemonStats { get; }
         bool RenamePokemon { get; }
         bool RenamePokemonRespectTransferRule { get; }
@@ -133,18 +143,18 @@ namespace PoGo.NecroBot.Logic.Interfaces.Configuration
         int TotalAmountOfPotionsToKeep { get; }
         int TotalAmountOfRevivesToKeep { get; }
         int TotalAmountOfBerriesToKeep { get; }
+        int TotalAmountOfEvolutionToKeep { get; }
 
         bool UseRecyclePercentsInsteadOfTotals { get; }
         int PercentOfInventoryPokeballsToKeep { get; }
         int PercentOfInventoryPotionsToKeep { get; }
         int PercentOfInventoryRevivesToKeep { get; }
         int PercentOfInventoryBerriesToKeep { get; }
+        int PercentOfInventoryEvolutionToKeep { get; }
 
         bool DetailedCountsBeforeRecycling { get; }
         bool VerboseRecycling { get; }
         double RecycleInventoryAtUsagePercentage { get; }
-        double EvolveKeptPokemonsAtStorageUsagePercentage { get; }
-        int EvolveKeptPokemonIfBagHasOverThisManyPokemon { get; }
         bool UseSnipeLimit { get; }
         bool UsePokeStopLimit { get; }
         bool UseCatchLimit { get; }
@@ -239,11 +249,6 @@ namespace PoGo.NecroBot.Logic.Interfaces.Configuration
         bool SkipCollectingLevelUpRewards { get; }
         Dictionary<ItemId, ItemUseFilter> ItemUseFilters { get; }
         double UpgradePokemonLvlMinimum { get; }
-        bool EvolveFavoritedOnly { get; }
-        string EvolveOperator { get; }
-        double EvolveMinIV { get; }
-        double EvolveMinCP { get;  }
-        double EvolveMinLevel { get; }
         int MinLevelForAutoSnipe { get;  }
 
         bool UseHumanlikeDelays { get; }
@@ -253,5 +258,7 @@ namespace PoGo.NecroBot.Logic.Interfaces.Configuration
         int CatchFleeDelay { get; }
         int CatchMissedDelay { get; }
         int BeforeCatchDelay { get; }
+        bool AutoWalkAI { get; }
+        int AutoWalkDist { get; }
     }
 }

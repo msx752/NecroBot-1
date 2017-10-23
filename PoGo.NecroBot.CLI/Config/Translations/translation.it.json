@@ -78,7 +78,7 @@
     },
     {
       "Key": "eventFortUsed",
-      "Value": "Nome: {0} PE: {1}, Gemme: {2}, Oggetti: {3}"
+      "Value": "Name: {0} | XP: {1} | Gems: {2} | Items: {3} | Badges: {4} | BonusLoot: {5} | RaidTickets: {6} | TeamBonusLoot: {7} | PokemonEgg: {8} (Eggs: {9}) | Lat: {10} Long: {11} | Alt: {12}"
     },
     {
       "Key": "eventFortFailed",
@@ -94,7 +94,7 @@
     },
     {
       "Key": "eventFortTargeted",
-      "Value": "Camminando verso il {0}: {1} ({2}m) ({3} secondi) (route {4})"
+      "Value": "Camminando verso il {0}m({1} sec) via'{2}' to next {3}: {4}"
     },
     {
       "Key": "eventProfileLogin",
@@ -126,11 +126,11 @@
     },
     {
       "Key": "eventPokemonCaptureSuccess",
-      "Value": "({0}) | ({1}) {2} | Lvl: {3} PL: {4}/{5} IV: {6}% | Chance: {7}% | {8}m dist | con una {9} ({10} rimanenti). | {11} PE guadagnati | {12} | lat: {13} long: {14} | Mossa1: {15} Mossa2: {16}"
+      "Value": "({0}) | ({1}) {2} | Lvl: {3} | CP: {4}/{5} | IV: {6}% | Chance: {7}% | {8}m dist | with a {9} ({10} left) | XP: {11} | SD: {12} | {13} | lat: {14} long: {15} | Move1: {16} Move2: {17} | Rarity: {18} | Capture Reason: {19} | Shiny: {20} | Form: {21} | Costume: {22} | Sex: {23}"
     },
     {
       "Key": "eventPokemonCaptureFailed",
-      "Value": "({0}) | ({1}) {2} | Lvl: {3} PL: {4}/{5} IV: {6}% | Chance: {7}% | {8}m dist | con una {9} ({10} rimanenti). | lat: {11} long: {12} | Mossa1: {13} Mossa2: {14}"
+      "Value": "({0}) | ({1}) {2} | Lvl: {3} | CP: {4}/{5} | IV: {6}% | Chance: {7}% | {8}m dist | with a {9} ({10} left) | XP: {11} | lat: {12} long: {13} | Move1: {14} Move2: {15} | Rarity :{16}"
     },
     {
       "Key": "eventNoPokeballs",
@@ -139,6 +139,10 @@
     {
       "Key": "waitingForMorePokemonToEvolve",
       "Value": "In attesa di catturare ancora {1} Pokemon per evolverne {0}! ({2}/{3} per il {4}% dell'inventario)"
+    },
+	{
+      "Key": "WaitingForMoreEvolutionsToEvolve",
+      "Value": "Waiting for {0} more evolutions to start evolving! (Possible: {1} | Needed: {2})"
     },
     {
       "Key": "useLuckyEggsMinPokemonAmountTooHigh",
@@ -362,23 +366,23 @@
     },
     {
       "Key": "currentPokeballInv",
-      "Value": "Pokéball: {0} | Megaball: {1} | Ultraball: {2} | Masterball: {3}"
+      "Value": "Pokéball:  {0} | Megaball:     {1} | Ultraball:    {2} | Masterball:   {3}"
     },
     {
       "Key": "CurrentPotionInv",
-      "Value": "Pozioni: {0} | SuperPozioni: {1} | IperPozioni: {2} | PozioniMax: {3}"
+      "Value": "Pozioni:   {0} | SuperPozioni: {1} | IperPozioni:  {2} | PozioniMax:   {3}"
     },
     {
       "Key": "CurrentReviveInv",
-      "Value": "Revitalizzanti: {0} | RevitalMax: {1}"
+      "Value": "Revives:   {0} | MaxRevives:   {1} | Evolve Items: {2} | Raid Tickets: {3}"
     },
     {
       "Key": "CurrentMiscItemInv",
-      "Value": "Bacche: {0} | Aromi: {1} | Fortunuovi: {2} | Esche: {3}"
+      "Value": "Bacche:    {0} | Aromi:        {1} | Fortunuovi:   {2} | Esche:        {3}"
     },
     {
       "Key": "maxItemsCombinedOverMaxItemStorage",
-      "Value": "[Configurazione Non Valida] La somma degli oggetti (Pokeball+Pozioni+Revitalizzanti={0}) è maggiore della capacità massima dell'inventario ({1})"
+      "Value": "[Configurazione Non Valida] La somma degli oggetti (Pokeball+Pozioni+Revitalizzanti+Evolution={0}) è maggiore della capacità massima dell'inventario ({1})"
     },
     {
       "Key": "recyclingQuietly",
@@ -566,7 +570,7 @@
     },
     {
       "Key": "amountPkmSeenCaught",
-      "Value": "Pokémon Visti: {0}/251, Pokémon catturati: {1}/251"
+      "Value": "Pokémon Visti: {0}/{1}, Pokémon catturati: {2}/{3}"
     },
     {
       "Key": "pkmPotentialEvolveCount",

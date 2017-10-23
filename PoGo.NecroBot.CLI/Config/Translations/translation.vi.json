@@ -78,7 +78,7 @@
     },
     {
       "Key": "eventFortUsed",
-      "Value": "Tên: {0} XP: {1}, Gems: {2}, Items: {3}, Lat: {4}, Long: {5}, Alt: {6}"
+      "Value": "Name: {0} | XP: {1} | Gems: {2} | Items: {3} | Badges: {4} | BonusLoot: {5} | RaidTickets: {6} | TeamBonusLoot: {7} | PokemonEgg: {8} (Eggs: {9}) | Lat: {10} Long: {11} | Alt: {12}"
     },
     {
       "Key": "eventFortFailed",
@@ -94,7 +94,7 @@
     },
     {
       "Key": "eventFortTargeted",
-      "Value": "Đi đến {0}: {1} (xa {2}m) (trong {3} giây) (route {4})"
+      "Value":  "Traveling {0}m({1} sec) via'{2}' to next {3}: {4}"
     },
     {
       "Key": "eventProfileLogin",
@@ -126,11 +126,11 @@
     },
     {
       "Key": "eventPokemonCaptureSuccess",
-      "Value": "({0}) | ({1}) {2} | Lvl: {3} CP: {4}/{5} IV: {6}% | Cơ hội bắt được: {7}% | Cách xa {8}m | Bắt bằng {9} (Còn lại {10}) | Nhận được {11} EXP | {12} | Toạ độ: {13},{14} | Move1: {15} Move2: {16}"
+      "Value": "({0}) | ({1}) {2} | Lvl: {3} | CP: {4}/{5} | IV: {6}% | Chance: {7}% | {8}m dist | with a {9} ({10} left) | XP: {11} | SD: {12} | {13} | lat: {14} long: {15} | Move1: {16} Move2: {17} | Rarity: {18} | Capture Reason: {19} | Shiny: {20} | Form: {21} | Costume: {22} | Sex: {23}"
     },
     {
       "Key": "eventPokemonCaptureFailed",
-      "Value": "({0}) | ({1}) {2} | Lvl: {3} CP: {4}/{5} IV: {6}% | Cơ hội bắt được: {7}% | Cách xa {8}m | Bắt bằng {9} (Còn lại {10}) | Toạ độ: {11},{12} | Move1: {13} Move2: {14}"
+      "Value": "({0}) | ({1}) {2} | Lvl: {3} | CP: {4}/{5} | IV: {6}% | Chance: {7}% | {8}m dist | with a {9} ({10} left) | XP: {11} | lat: {12} long: {13} | Move1: {14} Move2: {15} | Rarity :{16}"
     },
     {
       "Key": "eventNoPokeballs",
@@ -139,6 +139,10 @@
     {
       "Key": "waitingForMorePokemonToEvolve",
       "Value": "Đợi để tiến hoá {0} Pokemon lần {1} đã bắt! ({2}/{3} - {4}% túi)"
+    },
+	{
+      "Key": "WaitingForMoreEvolutionsToEvolve",
+      "Value": "Waiting for {0} more evolutions to start evolving! (Possible: {1} | Needed: {2})"
     },
     {
       "Key": "useLuckyEggsMinPokemonAmountTooHigh",
@@ -374,23 +378,23 @@
     },
     {
       "Key": "currentPokeballInv",
-      "Value": "Pokeballs: {0} | Greatballs: {1} | Ultraballs: {2} | Masterballs: {3}"
+      "Value": "Pokeballs: {0} | Greatballs:  {1} | Ultraballs:    {2} | Masterballs:  {3}"
     },
     {
       "Key": "currentPotionInv",
-      "Value": "Potions: {0} | SuperPotions: {1} | HyperPotions: {2} | MaxPotions: {3}"
+      "Value": "Potions:   {0} | SuperPotions: {1} | HyperPotions: {2} | MaxPotions:   {3}"
     },
     {
       "Key": "currentReviveInv",
-      "Value": "Revives: {0} | MaxRevives: {1}"
+      "Value": "Revives:   {0} | MaxRevives:   {1} | Evolve Items: {2} | Raid Tickets: {3}"
     },
     {
       "Key": "currentMiscItemInv",
-      "Value": "Berry: {0} | LồngẤp: {1} | LuckyEggs: {2} | Lure: {3}"
+      "Value": "Berry:     {0} | LồngẤp:       {1} | LuckyEggs:    {2} | Lure:         {3}"
     },
     {
       "Key": "maxItemsCombinedOverMaxItemStorage",
-      "Value": "[Cấu Hình Không Hợp Lệ] Tổng số vật phẩm tối đa của bạn (balls+potions+revives={0}) đã vượt qua số lượng vật phẩm tốt đa trong túi ({1})"
+      "Value": "[Cấu Hình Không Hợp Lệ] Tổng số vật phẩm tối đa của bạn (balls+potions+revives+Evolution={0}) đã vượt qua số lượng vật phẩm tốt đa trong túi ({1})"
     },
     {
       "Key": "recyclingQuietly",
@@ -590,7 +594,7 @@
     },
     {
       "Key": "amountPkmSeenCaught",
-      "Value": "Số loài Pokemon đã thấy: {0}/251, số loài Pokemon đã bắt: {1}/251"
+      "Value": "Số loài Pokemon đã thấy: {0}/{1}, số loài Pokemon đã bắt: {2}/{3}"
     },
     {
       "Key": "pkmPotentialEvolveCount",

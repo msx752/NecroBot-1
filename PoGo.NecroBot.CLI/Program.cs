@@ -26,6 +26,7 @@ using CommandLine;
 using CommandLine.Text;
 using PokemonGo.RocketAPI;
 using System.Net.Http;
+using POGOProtos.Networking.Responses;
 
 #endregion using directives
 
@@ -76,10 +77,10 @@ namespace PoGo.NecroBot.CLI
         private static bool _ignoreKillSwitch;
 
         private static readonly Uri StrKillSwitchUri =
-            new Uri("https://raw.githubusercontent.com/Necrobot-Private/NecroBot/master/KillSwitch.txt");
+            new Uri("https://raw.githubusercontent.com/NecroBot-Private/NecroBot/master/KillSwitch.txt");
 
         private static readonly Uri StrMasterKillSwitchUri =
-            new Uri("https://raw.githubusercontent.com/Necrobot-Private/NecroBot/master/PoGo.NecroBot.Logic/MKS.txt");
+            new Uri("https://raw.githubusercontent.com/NecroBot-Private/NecroBot/master/PoGo.NecroBot.Logic/MKS.txt");
 
         private static Session _session;
 
@@ -296,22 +297,44 @@ namespace PoGo.NecroBot.CLI
                     settings.LocationConfig.ResumeTrackPt = nearestPt.PtIndex;
                 }
             }
+
             IElevationService elevationService = new ElevationService(settings);
 
-            //validation auth.config
             if (boolNeedsSetup)
             {
+                //validation auth.config
                 AuthAPIForm form = new AuthAPIForm(true);
                 if (form.ShowDialog() == DialogResult.OK)
                 {
                     settings.Auth.APIConfig = form.Config;
                 }
+
+                _session = new Session(settings, new ClientSettings(settings, elevationService), logicSettings, elevationService, translation);
+
+                StarterConfigForm configForm = new StarterConfigForm(_session, settings, elevationService, configFile);
+                if (configForm.ShowDialog() == DialogResult.OK)
+                {
+                    var fileName = Assembly.GetEntryAssembly().Location;
+                    Process.Start(fileName);
+                    Environment.Exit(0);
+                }
+
+                //if (GlobalSettings.PromptForSetup(_session.Translation))
+                //{
+                //    _session = GlobalSettings.SetupSettings(_session, settings, elevationService, configFile);
+
+                //    var fileName = Assembly.GetExecutingAssembly().Location;
+                //    Process.Start(fileName);
+                //    Environment.Exit(0);
+                //}
             }
             else
             {
+                _session = new Session(settings, new ClientSettings(settings, elevationService), logicSettings, elevationService, translation);
+
                 var apiCfg = settings.Auth.APIConfig;
 
-                if (apiCfg.UsePogoDevAPI)
+                if (apiCfg.UsePogoDevAPI || apiCfg.UseCustomAPI)
                 {
                     if (string.IsNullOrEmpty(apiCfg.AuthAPIKey))
                     {
@@ -319,57 +342,49 @@ namespace PoGo.NecroBot.CLI
                             "You have selected PogoDev API but you have not provided an API Key, please press any key to exit and correct you auth.json, \r\n The Pogodev API key can be purchased at - https://talk.pogodev.org/d/51-api-hashing-service-by-pokefarmer",
                             LogLevel.Error
                         );
-
                         Console.ReadKey();
                         Environment.Exit(0);
                     }
                     try
                     {
                         HttpClient client = new HttpClient();
+                        string urlcheck = null;
                         client.DefaultRequestHeaders.Add("X-AuthToken", apiCfg.AuthAPIKey);
                         var maskedKey = apiCfg.AuthAPIKey.Substring(0, 4) + "".PadLeft(apiCfg.AuthAPIKey.Length - 8, 'X') + apiCfg.AuthAPIKey.Substring(apiCfg.AuthAPIKey.Length - 4, 4);
-                        HttpResponseMessage response = client.PostAsync("https://pokehash.buddyauth.com/api/v133_1/hash", null).Result;
-
+                        if (settings.Auth.APIConfig.UseCustomAPI)
+                            urlcheck = $"{settings.Auth.APIConfig.UrlHashServices}{settings.Auth.APIConfig.EndPoint}";
+                        else
+                            urlcheck = $"https://pokehash.buddyauth.com/{Constants.ApiEndPoint}";
+                        Logger.Write($"Hash End-Point Set to '{urlcheck}'", LogLevel.Info, ConsoleColor.Blue);
+                        HttpResponseMessage response = client.PostAsync(urlcheck, null).Result;
                         string AuthKey = response.Headers.GetValues("X-AuthToken").FirstOrDefault();
                         string MaxRequestCount = response.Headers.GetValues("X-MaxRequestCount").FirstOrDefault();
-                        DateTime AuthTokenExpiration = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Local).AddSeconds(Convert.ToDouble(response.Headers.GetValues("X-AuthTokenExpiration").FirstOrDefault())).ToLocalTime();
+                        DateTime AuthTokenExpiration = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Unspecified).AddSeconds(Convert.ToDouble(response.Headers.GetValues("X-AuthTokenExpiration").FirstOrDefault())).ToLocalTime();
                         TimeSpan Expiration = AuthTokenExpiration - DateTime.Now;
-                        string Result = $"Key: {maskedKey} RPM: {MaxRequestCount} Expiration Date: {AuthTokenExpiration.Month}/{AuthTokenExpiration.Day}/{AuthTokenExpiration.Year} ({Expiration.Days} Days {Expiration.Hours} Hours {Expiration.Minutes} Minutes)";
+                        string Result = $"Key: {maskedKey} RPM: {MaxRequestCount} Expires in: {Expiration.Days - 1} days ({AuthTokenExpiration})";
                         Logger.Write(Result, LogLevel.Info, ConsoleColor.Green);
                     }
                     catch
                     {
-                        Logger.Write("The HashKey is invalid or has expired, please press any key to exit and correct you auth.json, \r\n The Pogodev API key can be purchased at - https://talk.pogodev.org/d/51-api-hashing-service-by-pokefarmer", LogLevel.Error);
+                        Logger.Write("The HashKey is invalid or has expired, please press any key to exit and correct your auth.json, \r\nThe PogoDev API key can be purchased at - https://talk.pogodev.org/d/51-api-hashing-service-by-pokefarmer", LogLevel.Error);
                         Console.ReadKey();
                         Environment.Exit(0);
                     }
                 }
-                else if (apiCfg.UseLegacyAPI)
-                {
-                    Logger.Write(
-                        "You bot will start after 15 seconds, You are running bot with Legacy API (0.45), but it will increase your risk of being banned and triggering captchas. Config Captchas in config.json to auto-resolve them",
-                        LogLevel.Warning
-                    );
 
-#if RELEASE
-                    Thread.Sleep(15000);
-#endif
-                }
-                else
+                //GlobalSettings.Load(_subPath, _enableJsonValidation);
+
+                //Logger.Write("Press a Key to continue...",
+                //    LogLevel.Warning);
+                //Console.ReadKey();
+                //return;
+
+                if (excelConfigAllow)
                 {
-                    Logger.Write(
-                        "At least 1 authentication method must be selected, please correct your auth.json.",
-                        LogLevel.Error
-                    );
-                    Console.ReadKey();
-                    Environment.Exit(0);
+                    ExcelConfigHelper.MigrateFromObject(settings, excelConfigFile);
                 }
             }
 
-            _session = new Session(settings,
-                new ClientSettings(settings, elevationService), logicSettings, elevationService,
-                translation
-            );
             ioc.Register<ISession>(_session);
 
             Logger.SetLoggerContext(_session);
@@ -424,10 +439,15 @@ namespace PoGo.NecroBot.CLI
             var strVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString(4);
             stats.DirtyEvent +=
                 () =>
-                    Console.Title = $"[Necrobot2 v{strVersion}] " +
+                {
+                    GetPlayerResponse x = _session.Client.Player.GetPlayer().Result;
+                    string warn = x.Warn ? "*(Flagged)*-" : null;
+
+                    Console.Title = $"[NecroBot2 v{strVersion}] Team: {x.PlayerData.Team} - {warn}" +
                                     stats.GetTemplatedStats(
                                         _session.Translation.GetTranslation(TranslationString.StatsTemplateString),
                                         _session.Translation.GetTranslation(TranslationString.StatsXpTemplateString));
+                };
             ProgressBar.Fill(40);
 
             var aggregator = new StatisticsAggregator(stats);
@@ -475,15 +495,6 @@ namespace PoGo.NecroBot.CLI
             {
             } 
 			
-            var TotXP = 0;
-
-            for (int i = 0; i < bot.Level + 1; i++)
-            {
-                TotXP = TotXP + Statistics.GetXpDiff(i);
-            }
-            var user = !string.IsNullOrEmpty(bot.Nickname) ? bot.Nickname : bot.Username;
-            Logger.Write($"User: {user} | XP: {bot.CurrentXp - TotXP} | SD: {bot.Stardust}", LogLevel.BotStats);
-
             if (settings.TelegramConfig.UseTelegramAPI)
                 _session.Telegram = new TelegramService(settings.TelegramConfig.TelegramAPIKey, _session);
 
@@ -521,7 +532,7 @@ namespace PoGo.NecroBot.CLI
 #pragma warning restore 4014
             _session.EventDispatcher.EventReceived += evt => AnalyticsService.Listen(evt, _session);
 
-            var trackFile = Path.GetTempPath() + "\\necrobot2.io";
+            var trackFile = Path.GetTempPath() + "\\NecroBot2.io";
 
             if (!File.Exists(trackFile) || File.GetLastWriteTime(trackFile) < DateTime.Now.AddDays(-1))
             {

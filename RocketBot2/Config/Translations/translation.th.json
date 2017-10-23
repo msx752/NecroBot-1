@@ -78,7 +78,7 @@
     },
     {
       "Key": "eventFortUsed",
-      "Value": "{0} ค่าประสบการณ์ : {1}, อัญมณี : {2}, ไอเทม : {3}, ละติจูด : {4} ลองติจูด : {5}"
+      "Value": "Name: {0} | XP: {1} | Gems: {2} | Items: {3} | Badges: {4} | BonusLoot: {5} | RaidTickets: {6} | TeamBonusLoot: {7} | PokemonEgg: {8} (Eggs: {9}) | Lat: {10} Long: {11} | Alt: {12}"
     },
     {
       "Key": "eventFortFailed",
@@ -94,7 +94,7 @@
     },
     {
       "Key": "eventFortTargeted",
-      "Value": "กำลังเดินทางไปสู่ {0} : {1} ( {2} เมตร ) ( {3} วินาที ) (เส้นทางคือ : {4})"
+      "Value":  "Traveling {0}m({1} sec) via'{2}' to next {3}: {4}"
     },
     {
       "Key": "eventProfileLogin",
@@ -126,11 +126,11 @@
     },
     {
       "Key": "eventPokemonCaptureSuccess",
-      "Value": "({0}) | ({1}) {2} | เลเวล : {3} CP : {4}/{5} IV : {6}% | โอกาส : {7}% | ระยะ {8} เมตร | จับด้วย{9} (เหลือโปเกบอล {10} ชิ้น). | ได้รับค่าประสบการณ์ {11} EXP | {12} | ละติจูด : {13} ลองติจูด : {14} | ย้าย 1 : {15} ย้าย 2 : {16}"
+      "Value": "({0}) | ({1}) {2} | Lvl: {3} | CP: {4}/{5} | IV: {6}% | Chance: {7}% | {8}m dist | with a {9} ({10} left) | XP: {11} | SD: {12} | {13} | lat: {14} long: {15} | Move1: {16} Move2: {17} | Rarity: {18} | Capture Reason: {19} | Shiny: {20} | Form: {21} | Costume: {22} | Sex: {23}"
     },
     {
       "Key": "eventPokemonCaptureFailed",
-      "Value": "({0}) | ({1}) {2} | เลเวล : {3} CP : {4}/{5} IV : {6}% | โอกาส : {7}% | ระยะ {8} เมตร | จับได้ {9} (เหลือโปเกบอล {10} ชิ้น). | ละติจูด : {11} ลองติจูด : {12} | ย้าย 1 : {13} ย้าย 2 : {14}"
+      "Value": "({0}) | ({1}) {2} | Lvl: {3} | CP: {4}/{5} | IV: {6}% | Chance: {7}% | {8}m dist | with a {9} ({10} left) | XP: {11} | lat: {12} long: {13} | Move1: {14} Move2: {15} | Rarity :{16}"
     },
     {
       "Key": "eventNoPokeballs",
@@ -139,6 +139,10 @@
     {
       "Key": "waitingForMorePokemonToEvolve",
       "Value": "รอการแปลงร่าง {0} ของโปเกมอน {1} จับเพิ่มเติม! ({2}/{3} จาก {4}% ในคลัง)"
+    },
+	{
+      "Key": "WaitingForMoreEvolutionsToEvolve",
+      "Value": "Waiting for {0} more evolutions to start evolving! (Possible: {1} | Needed: {2})"
     },
     {
       "Key": "useLuckyEggsMinPokemonAmountTooHigh",
@@ -378,23 +382,23 @@
     },
     {
       "Key": "currentPokeballInv",
-      "Value": "โปเกบอล : {0} | เกรสบอล : {1} | อัลตร้าบอล : {2} | มาสเตอร์บอล : {3}"
+      "Value": "โปเกบอล :  {0} | เกรสบอล :      {1} | อัลตร้าบอล :     {2} | มาสเตอร์บอล :          {3}"
     },
     {
       "Key": "currentPotionInv",
-      "Value": "น้ำยา : {0} | ซูเปอร์น้ำยา : {1} | ไฮเปอร์น้ำยา : {2} | แม็กซ์น้ำยา : {3}"
+      "Value": "น้ำยา :     {0} | ซูเปอร์น้ำยา :    {1} | ไฮเปอร์น้ำยา :    {2} | แม็กซ์น้ำยา :           {3}"
     },
     {
       "Key": "currentReviveInv",
-      "Value": "ฟื้นฟู : {0} | ฟื้นฟูสูงสุด : {1}"
+      "Value": "Revives:   {0} | MaxRevives:   {1} | Evolve Items: {2} | Raid Tickets:        {3}"
     },
     {
       "Key": "currentMiscItemInv",
-      "Value": "ผลเบอรี่ : {0} | ตัวล่อโปเกมอน : {1} | Lucky Eggs: {2} | ตัวล่อเสา Poke Stops : {3}"
+      "Value": "ผลเบอรี่ :    {0} | ตัวล่อโปเกมอน : {1} | Lucky Eggs:    {2} | ตัวล่อเสา Poke Stops : {3}"
     },
     {
       "Key": "maxItemsCombinedOverMaxItemStorage",
-      "Value": "[การตั้งค่าผิดพลาด] รวมไอเทมสูงสุดของคุณ (balls+potions+revives={0}) หรือเกินจำนวนสูงสุดในคลังของคุณ ({1})"
+      "Value": "[การตั้งค่าผิดพลาด] รวมไอเทมสูงสุดของคุณ (balls+potions+revives+Evolution={0}) หรือเกินจำนวนสูงสุดในคลังของคุณ ({1})"
     },
     {
       "Key": "recyclingQuietly",
@@ -594,7 +598,7 @@
     },
     {
       "Key": "amountPkmSeenCaught",
-      "Value": "รวมการดึงดูดโปเกมอน : {0}/251, รวมโปเกมอนที่จับได้ : {1}/251"
+      "Value": "รวมการดึงดูดโปเกมอน : {0}/{1}, รวมโปเกมอนที่จับได้ : {2}/{3}"
     },
     {
       "Key": "pkmPotentialEvolveCount",

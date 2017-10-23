@@ -74,7 +74,7 @@
     },
     {
       "Key": "eventFortUsed",
-      "Value": "Name: {0} EP: {1}, Gems: {2}, Items: {3}"
+      "Value": "Name: {0} | XP: {1} | Gems: {2} | Items: {3} | Badges: {4} | BonusLoot: {5} | RaidTickets: {6} | TeamBonusLoot: {7} | PokemonEgg: {8} (Eggs: {9}) | Lat: {10} Long: {11} | Alt: {12}"
     },
     {
       "Key": "eventFortFailed",
@@ -90,7 +90,7 @@
     },
     {
       "Key": "eventFortTargeted",
-      "Value": "{0} {1} in ({2}m) ({3} Sekunden) (route {4})"
+      "Value": "Traveling {0}m({1} sec) via'{2}' to next {3}: {4}"
     },
     {
       "Key": "eventProfileLogin",
@@ -118,11 +118,11 @@
     },
     {
       "Key": "eventPokemonCaptureSuccess",
-      "Value": "({0}) | ({1}) {2} | Lvl: {3} WP: {4}/{5} IV: {6}% | Chance: {7}% | {8}m entfernt | mit {9} ({10} verbleibend). | {11} EP erhalten | {12} | B: {13} L: {14} | Move1: {15} Move2: {16}"
+      "Value": "({0}) | ({1}) {2} | Lvl: {3} | CP: {4}/{5} | IV: {6}% | Chance: {7}% | {8}m dist | with a {9} ({10} left) | XP: {11} | SD: {12} | {13} | lat: {14} long: {15} | Move1: {16} Move2: {17} | Rarity: {18} | Capture Reason: {19} | Shiny: {20} | Form: {21} | Costume: {22} | Sex: {23}"
     },
     {
       "Key": "eventPokemonCaptureFailed",
-      "Value": "({0}) | ({1}) {2} | Lvl: {3} WP: {4}/{5} IV: {6}% | Chance: {7}% | {8}m entfernt | mit {9} ({10} verbleibend). | B: {11} L: {12} | Move1: {13} Move2: {14}"
+      "Value": "({0}) | ({1}) {2} | Lvl: {3} | CP: {4}/{5} | IV: {6}% | Chance: {7}% | {8}m dist | with a {9} ({10} left) | XP: {11} | lat: {12} long: {13} | Move1: {14} Move2: {15} | Rarity :{16}"
     },
     {
       "Key": "eventNoPokeballs",
@@ -322,19 +322,19 @@
     },
     {
       "Key": "currentPokeballInv",
-      "Value": "Pokeball: {0} | Superball: {1} | Hyperball: {2} | Meisterball: {3}"
+      "Value": "Pokeball:  {0} | Superball:    {1} | Hyperball:    {2} | Meisterball:  {3}"
     },
     {
       "Key": "CurrentPotionInv",
-      "Value": "Traenke: {0} | Supertraenke: {1} | Hypertraenke: {2} | Top-Traenke: {3}"
+      "Value": "Traenke:   {0} | Supertraenke: {1} | Hypertraenke: {2} | Top-Traenke:  {3}"
     },
     {
       "Key": "CurrentReviveInv",
-      "Value": "Beleber: {0} | Top-Beleber: {1}"
+      "Value": "Revives:   {0} | MaxRevives:   {1} | Evolve Items: {2} | Raid Tickets: {3}"
     },
     {
       "Key": "CurrentMiscItemInv",
-      "Value": "Beeren: {0} | Rauch: {1} | Gluecks-Eier: {2} | Lockmodule: {3}"
+      "Value": "Beeren:    {0} | Rauch:        {1} | Gluecks-Eier: {2} | Lockmodule:   {3}"
     },
     {
       "Key": "invFullTransferring",
@@ -530,7 +530,7 @@
     },
     {
       "Key": "AmountPkmSeenCaught",
-      "Value": "Anzahl gesehener Pokemon: {0}/251, Anzahl gefangener Pokemon: {1}/251"
+      "Value": "Anzahl gesehener Pokemon: {0}/{1}, Anzahl gefangener Pokemon: {2}/{3}"
     },
     {
       "Key": "PkmPotentialEvolveCount",
@@ -542,7 +542,11 @@
     },
     {
       "Key": "waitingForMorePokemonToEvolve",
-      "Value": "Warte mit Entwicklungen von {0} Pokemon bis {1} weitere gefangen wurden! ({2}/{3} bis {4}% Inventar Auslastung)"
+      "Value": "Warte mit Entwicklungen von {0} Pokemons bis {1} weitere im Speicher sind! (Im Speicher: {2} | Ziel: {3})"
+    },
+    {
+      "Key": "WaitingForMoreEvolutionsToEvolve",
+      "Value": "Warte auf {0} weitere Entwicklungen um zu Entwicklen zu starten! ({1} von {2} erreicht)"
     },
     {
       "Key": "PokedexCatchedTelegram",
